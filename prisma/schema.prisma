@@ -1,0 +1,154 @@
+generator client {
+  provider = "prisma-client"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  name         String?
+  image        String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  profile      Profile?
+  badges       Badge[]
+  files        File[]
+  themes       Theme[]
+  accounts     Account[]
+  sessions     Session[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Profile {
+  id         String  @id @default(cuid())
+  userId     String  @unique
+  username   String  @unique
+  bio        String?
+  avatarUrl  String?
+  layoutType String  @default("centered")
+  customCss  String? @db.Text
+  isPublic   Boolean @default(true)
+  viewCount  Int     @default(0)
+  themeId    String?
+
+  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links Link[]
+  theme Theme? @relation(fields: [themeId], references: [id])
+
+  @@index([username])
+}
+
+model Link {
+  id         String  @id @default(cuid())
+  profileId  String
+  title      String
+  url        String
+  icon       String?
+  position   Int     @default(0)
+  isActive   Boolean @default(true)
+  clickCount Int     @default(0)
+  groupId    String?
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, position])
+}
+
+model Theme {
+  id        String @id @default(cuid())
+  userId    String
+  name      String
+  config    Json
+  isDefault Boolean @default(false)
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  profiles Profile[]
+}
+
+model Badge {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  label     String?
+  grantedAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model File {
+  id        String   @id @default(cuid())
+  userId    String
+  key       String
+  url       String
+  mimeType  String
+  size      Int
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  profileId String
+  linkId    String?
+  type      String
+  referrer  String?
+  country   String?
+  device    String?
+  createdAt DateTime @default(now())
+
+  @@index([profileId, createdAt])
+  @@index([linkId, createdAt])
+}
+
+model WaitlistSignup {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String?
+  createdAt DateTime @default(now())
+}
