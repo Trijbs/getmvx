@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { HeroMark } from "@/components/brand";
 import { ProfilePreview } from "./ProfilePreview";
 
 export function Hero() {
@@ -37,6 +38,10 @@ export function Hero() {
     <section className="mx-auto grid min-h-screen max-w-[1280px] grid-cols-1 items-center gap-[60px] px-[5%] pb-20 pt-[120px] lg:grid-cols-2">
       {/* Left — Copy */}
       <div>
+        <div className="mb-7">
+          <HeroMark size={68} />
+        </div>
+
         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[var(--accent)]/25 px-3 py-1.5 font-[family-name:var(--font-dm-mono)] text-xs tracking-widest text-[var(--accent)]">
           <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-[var(--accent)]" />
           Now in early access

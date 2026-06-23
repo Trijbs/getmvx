@@ -9,7 +9,7 @@ export function Nav() {
       <Link href="/" className="flex items-center gap-3">
         <LogoMark size={32} />
         <span className="font-[family-name:var(--font-display)] text-[18px] font-700 tracking-[0.08em] uppercase text-[var(--text)]">
-          GETMVX
+          GETMV<span className="text-[var(--accent)]">X</span>
         </span>
       </Link>
 
