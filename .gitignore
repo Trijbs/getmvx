@@ -51,6 +51,9 @@ email-worker/node_modules
 # leftover clone of the github repo
 /getmvx/
 
+# scratch preview renders
+/_preview_*.png
+
 # local-only: AI agent instructions & planning/research docs
 AGENTS.md
 CLAUDE.md

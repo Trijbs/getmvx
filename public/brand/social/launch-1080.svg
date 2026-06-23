@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080" fill="none">
+  <rect width="1080" height="1080" fill="#0c0c0e"/>
+  <rect x="60" y="60" width="960" height="960" rx="28" stroke="#c9a96e" stroke-opacity="0.18"/>
+  <text x="120" y="170" font-family="'DM Mono',monospace" font-size="24" fill="#c9a96e" letter-spacing="4">NOW LIVE</text>
+  <g transform="translate(120 250)">
+    <rect width="120" height="120" rx="26" fill="#131316" stroke="#c9a96e" stroke-opacity="0.25"/>
+    <rect x="39" y="42" width="8" height="42" rx="4" fill="#c9a96e"/>
+    <rect x="73" y="42" width="8" height="42" rx="4" fill="#c9a96e"/>
+    <rect x="39" y="40" width="42" height="8" rx="4" fill="#c9a96e"/>
+    <polygon points="60,55 70,65 60,75 50,65" fill="#f0eff4"/>
+  </g>
+  <text x="120" y="560" font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-weight="800" font-size="130" fill="#f0eff4" letter-spacing="1">Build without</text>
+  <text x="120" y="690" font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-weight="800" font-size="130" letter-spacing="1"><tspan fill="#c9a96e">limits.</tspan></text>
+  <text x="120" y="800" font-family="Inter,Arial,sans-serif" font-size="36" fill="#b8b7c0">The most customizable link-in-bio platform.</text>
+  <text x="120" y="970" font-family="'DM Mono',monospace" font-size="30" fill="#8a8998">getmvx.cc</text>
+</svg>

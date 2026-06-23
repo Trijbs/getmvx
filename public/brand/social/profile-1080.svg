@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1080" viewBox="0 0 1080 1080" fill="none">
+  <rect width="1080" height="1080" fill="#0c0c0e"/>
+  <circle cx="540" cy="540" r="470" stroke="#c9a96e" stroke-opacity="0.10"/>
+  <g transform="translate(360 330)">
+    <rect width="360" height="360" rx="78" fill="#131316" stroke="#c9a96e" stroke-opacity="0.25"/>
+    <rect x="118" y="126" width="22" height="124" rx="11" fill="#c9a96e"/>
+    <rect x="220" y="126" width="22" height="124" rx="11" fill="#c9a96e"/>
+    <rect x="118" y="120" width="124" height="22" rx="11" fill="#c9a96e"/>
+    <polygon points="180,160 208,188 180,216 152,188" fill="#f0eff4"/>
+  </g>
+  <text x="540" y="800" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-weight="600" font-size="92" letter-spacing="3"><tspan fill="#f0eff4">mv</tspan><tspan fill="#c9a96e">x</tspan></text>
+</svg>

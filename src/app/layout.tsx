@@ -23,17 +23,20 @@ const dmMono = DM_Mono({
   display: "swap",
 });
 
-const favicon = "/brand/favicons/getmvx-favicon.jpg";
-
 export const metadata: Metadata = {
   title: "MVX — Your identity, fully yours",
   description:
     "The most customizable link-in-bio platform. Free forever, or go Pro for full control. Built for creators, gamers, brands, and anyone who refuses to blend in.",
   metadataBase: new URL("https://getmvx.cc"),
+  manifest: "/site.webmanifest",
   icons: {
-    icon: favicon,
-    shortcut: favicon,
-    apple: favicon,
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-16.png", sizes: "16x16", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     title: "MVX — Your identity, fully yours",
@@ -42,12 +45,21 @@ export const metadata: Metadata = {
     url: "https://getmvx.cc",
     siteName: "MVX",
     type: "website",
+    images: [
+      {
+        url: "/brand/social/og-default.png",
+        width: 1200,
+        height: 630,
+        alt: "MVX — Your identity, fully yours",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "MVX — Your identity, fully yours",
     description:
       "The most customizable link-in-bio platform. Free forever, or go Pro for full control.",
+    images: ["/brand/social/og-default.png"],
   },
 };
 

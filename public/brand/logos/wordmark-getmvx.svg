@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="452" height="120" viewBox="0 0 452 120" fill="none">
+  <rect x="12" y="12" width="96" height="96" rx="12" stroke="#f0eff4" stroke-width="1.5"/>
+  <rect x="32" y="38" width="6" height="44" rx="3" fill="#c9a96e"/>
+  <rect x="82" y="38" width="6" height="44" rx="3" fill="#c9a96e"/>
+  <rect x="32" y="35" width="56" height="6" rx="3" fill="#c9a96e"/>
+  <rect x="44" y="44" width="32" height="32" rx="4" transform="rotate(45 60 60)" stroke="#c9a96e" stroke-width="1.5"/>
+  <circle cx="60" cy="60" r="9" stroke="#f0eff4" stroke-width="1.5"/>
+  <circle cx="60" cy="60" r="2.5" fill="#c9a96e"/>
+  <text x="140" y="82" font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-weight="700" font-size="68" letter-spacing="1">
+    <tspan fill="#f0eff4">getmv</tspan><tspan fill="#c9a96e">x</tspan>
+  </text>
+</svg>

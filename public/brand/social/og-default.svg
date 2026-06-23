@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#0c0c0e"/>
+  <rect x="40" y="40" width="1120" height="550" rx="20" stroke="#c9a96e" stroke-opacity="0.18"/>
+  <circle cx="1080" cy="120" r="70" stroke="#c9a96e" stroke-opacity="0.10"/>
+  <circle cx="1080" cy="120" r="44" stroke="#c9a96e" stroke-opacity="0.08"/>
+  <circle cx="140" cy="500" r="60" stroke="#c9a96e" stroke-opacity="0.08"/>
+  <g transform="translate(525 140)">
+    <rect width="150" height="150" rx="33" fill="#131316" stroke="#c9a96e" stroke-opacity="0.25"/>
+    <rect x="49" y="52" width="10" height="52" rx="5" fill="#c9a96e"/>
+    <rect x="91" y="52" width="10" height="52" rx="5" fill="#c9a96e"/>
+    <rect x="49" y="50" width="52" height="10" rx="5" fill="#c9a96e"/>
+    <polygon points="75,67 87,79 75,91 63,79" fill="#f0eff4"/>
+  </g>
+  <text x="600" y="400" text-anchor="middle" font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-weight="700" font-size="100" letter-spacing="2"><tspan fill="#f0eff4">getmv</tspan><tspan fill="#c9a96e">x</tspan></text>
+  <text x="600" y="452" text-anchor="middle" font-family="Inter,Arial,sans-serif" font-size="30" fill="#b8b7c0">Your identity, fully yours.</text>
+  <text x="64" y="566" font-family="'DM Mono',monospace" font-size="20" fill="#8a8998">getmvx.cc</text>
+  <text x="1136" y="566" text-anchor="end" font-family="'DM Mono',monospace" font-size="20" fill="#8a8998">The Gateway to Building</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120" fill="none">
+  <circle cx="60" cy="60" r="58" fill="#0c0c0e" stroke="#c9a96e" stroke-width="1.5"/>
+  <text x="60" y="75" text-anchor="middle" font-family="Inter,'Helvetica Neue',Arial,sans-serif" font-weight="600" font-size="46" letter-spacing="1">
+    <tspan fill="#f0eff4">mv</tspan><tspan fill="#c9a96e">x</tspan>
+  </text>
+</svg>

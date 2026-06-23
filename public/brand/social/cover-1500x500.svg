@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="500" viewBox="0 0 1500 500" fill="none">
+  <rect width="1500" height="500" fill="#0c0c0e"/>
+  <line x1="0" y1="250" x2="1500" y2="250" stroke="#c9a96e" stroke-opacity="0.06"/>
+  <line x1="750" y1="0" x2="750" y2="500" stroke="#c9a96e" stroke-opacity="0.06"/>
+  <g transform="translate(150 175)">
+    <rect width="150" height="150" rx="33" fill="#131316" stroke="#c9a96e" stroke-opacity="0.25"/>
+    <rect x="49" y="52" width="10" height="52" rx="5" fill="#c9a96e"/>
+    <rect x="91" y="52" width="10" height="52" rx="5" fill="#c9a96e"/>
+    <rect x="49" y="50" width="52" height="10" rx="5" fill="#c9a96e"/>
+    <polygon points="75,67 87,79 75,91 63,79" fill="#f0eff4"/>
+  </g>
+  <text x="340" y="240" font-family="'Barlow Condensed','Arial Narrow',sans-serif" font-weight="700" font-size="88" letter-spacing="2"><tspan fill="#f0eff4">getmv</tspan><tspan fill="#c9a96e">x</tspan></text>
+  <text x="342" y="290" font-family="Inter,Arial,sans-serif" font-size="28" fill="#b8b7c0">Your identity, fully yours.</text>
+</svg>
