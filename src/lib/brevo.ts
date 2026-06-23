@@ -126,7 +126,7 @@ export async function sendTransactionalEmail(params: SendEmailParams) {
     method: "POST",
     body: JSON.stringify({
       sender: params.sender ?? {
-        email: "noreply@getmvx.cc",
+        email: "info@getmvx.cc",
         name: "MVX",
       },
       to: params.to,
