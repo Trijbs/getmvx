@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { sanitizeCustomCss } from "@/lib/sanitize";
 
 export async function PATCH(req: Request) {
   try {
@@ -34,7 +35,10 @@ export async function PATCH(req: Request) {
       data: {
         ...(bio !== undefined && { bio }),
         ...(themeId !== undefined && { themeId }),
-        ...(customCss !== undefined && { customCss }),
+        // Neutralize <style>/<script> breakout before storing user CSS.
+        ...(customCss !== undefined && {
+          customCss: sanitizeCustomCss(customCss),
+        }),
         ...(layoutType !== undefined && { layoutType }),
       },
     });

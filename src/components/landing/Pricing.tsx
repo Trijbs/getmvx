@@ -2,7 +2,7 @@ export function Pricing() {
   return (
     <section id="pricing" className="mx-auto max-w-[1100px] px-[5%] py-25 text-center">
       <span className="mb-4 block font-[family-name:var(--font-dm-mono)] text-xs tracking-[0.1em] text-[var(--accent)]">
-        // simple pricing
+        {"// simple pricing"}
       </span>
       <h2 className="mb-4 font-[family-name:var(--font-barlow)] text-[clamp(36px,4vw,54px)] font-800 leading-tight">
         Free forever. Pro when you&apos;re ready.
