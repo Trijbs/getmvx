@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
-import { defaultThemes } from "@/lib/themes";
 
 export async function POST(req: Request) {
   try {
@@ -46,15 +45,9 @@ export async function POST(req: Request) {
       },
     });
 
-    // Create default themes for the user
-    await prisma.theme.createMany({
-      data: defaultThemes.map((theme) => ({
-        userId: user.id,
-        name: theme.name,
-        config: theme.config,
-        isDefault: theme.name === "Midnight",
-      })),
-    });
+    // Default themes are created once during profile setup (the single path all
+    // users — credentials and OAuth — take to get a profile), so we don't create
+    // them here. Doing both produced duplicate themes for credentials users.
 
     return NextResponse.json(
       {
