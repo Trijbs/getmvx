@@ -2,11 +2,14 @@ import dotenv from "dotenv";
 dotenv.config({ path: ".env.local" });
 
 import { PrismaClient } from "./generated/prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaNeon } from "@prisma/adapter-neon";
+import { neonConfig } from "@neondatabase/serverless";
 
-const adapter = new PrismaPg({
+// Use fetch-based querying so the seed runs in Node without a WebSocket shim.
+neonConfig.poolQueryViaFetch = true;
+
+const adapter = new PrismaNeon({
   connectionString: process.env.DATABASE_URL!,
-  ssl: { rejectUnauthorized: false },
 });
 const prisma = new PrismaClient({ adapter });
 
