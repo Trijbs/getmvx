@@ -1,5 +1,6 @@
 "use client";
 
+import NextLink from "next/link";
 import type { Profile, Link, Theme } from "../../../prisma/generated/prisma/client";
 
 type ProfileWithRelations = Profile & {
@@ -58,6 +59,10 @@ export function PublicProfile({ profile }: PublicProfileProps) {
         {/* Header */}
         <div className="mb-6 text-center">
           {profile.avatarUrl ? (
+            // User-supplied avatar from an arbitrary external host (R2 / custom
+            // domain). next/image would require per-host remotePatterns config,
+            // so a plain <img> is the correct tool here.
+            // eslint-disable-next-line @next/next/no-img-element
             <img
               src={profile.avatarUrl}
               alt={profile.username}
@@ -130,13 +135,13 @@ export function PublicProfile({ profile }: PublicProfileProps) {
 
         {/* Footer */}
         <div className="mt-10 text-center">
-          <a
+          <NextLink
             href="/"
             className="text-xs transition-opacity hover:opacity-100"
             style={{ color: config.mutedColor, opacity: 0.5 }}
           >
             Powered by MVX
-          </a>
+          </NextLink>
         </div>
       </div>
     </div>

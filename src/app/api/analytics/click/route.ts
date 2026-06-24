@@ -1,8 +1,26 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
+
+// Generous enough for real visitors, tight enough to blunt scripted inflation.
+const CLICK_LIMIT = 30;
+const CLICK_WINDOW_SECONDS = 10;
 
 export async function POST(req: Request) {
   try {
+    // Throttle per client IP so a script can't pump click counts in a loop.
+    const { success } = await rateLimit(
+      `click:${clientIp(req)}`,
+      CLICK_LIMIT,
+      CLICK_WINDOW_SECONDS
+    );
+    if (!success) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429 }
+      );
+    }
+
     const { linkId, profileId } = (await req.json()) as {
       linkId: string;
       profileId: string;
