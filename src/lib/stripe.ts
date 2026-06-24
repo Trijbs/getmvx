@@ -12,7 +12,7 @@ export const stripe = apiKey
 export const PLANS = {
   PRO_MONTHLY: {
     name: "Pro",
-    price: 499, // €4.99 in cents
+    price: 399, // €3.99 in cents
     interval: "month" as const,
     features: [
       "Full theme customization",
@@ -29,7 +29,7 @@ export const PLANS = {
   },
   PRO_YEARLY: {
     name: "Pro",
-    price: 3999, // €39.99 in cents
+    price: 3199, // €31.99 in cents (3.99/mo × 12 − 33%)
     interval: "year" as const,
     features: [
       "Everything in Pro Monthly",

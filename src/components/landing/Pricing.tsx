@@ -77,10 +77,10 @@ export function Pricing() {
             PRO
           </div>
           <div className="mb-1 font-[family-name:var(--font-barlow)] text-[56px] font-800 leading-none">
-            €<span>4.99</span>
+            €<span>3.99</span>
           </div>
           <div className="mb-6 text-[13px] text-[var(--muted)]">
-            per month · or €39.99/yr (save 33%)
+            per month · or €31.99/yr (save 33%)
           </div>
           <div className="mb-8 text-sm leading-relaxed text-[var(--muted)]">
             Full control over every pixel. The platform for creators who take
@@ -116,7 +116,7 @@ export function Pricing() {
         href="/register"
         className="block w-full rounded-[10px] bg-[var(--accent)] py-3.5 text-center text-[15px] font-600 text-[var(--bg)] transition-all hover:bg-[var(--accent2)]"
       >
-        Get Pro for €4.99/mo
+        Get Pro for €3.99/mo
       </a>
         </div>
       </div>
