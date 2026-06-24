@@ -27,9 +27,28 @@ export async function PATCH(
       return NextResponse.json({ error: "Link not found" }, { status: 404 });
     }
 
+    // Whitelist updatable fields — never trust the raw body. This prevents
+    // mass-assignment of protected columns (profileId, clickCount, id).
+    const data: {
+      title?: string;
+      url?: string;
+      icon?: string | null;
+      position?: number;
+      isActive?: boolean;
+      groupId?: string | null;
+    } = {};
+    if (typeof body.title === "string") data.title = body.title;
+    if (typeof body.url === "string") data.url = body.url;
+    if (typeof body.icon === "string" || body.icon === null)
+      data.icon = body.icon as string | null;
+    if (typeof body.position === "number") data.position = body.position;
+    if (typeof body.isActive === "boolean") data.isActive = body.isActive;
+    if (typeof body.groupId === "string" || body.groupId === null)
+      data.groupId = body.groupId as string | null;
+
     const updated = await prisma.link.update({
       where: { id },
-      data: body,
+      data,
     });
 
     return NextResponse.json(updated);

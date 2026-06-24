@@ -31,8 +31,11 @@ export async function POST(req: Request) {
     let customerId: string;
 
     // Check if user already has a Stripe customer ID
+    // Escape backslashes and quotes so an unusual email can't break out of the
+    // Stripe search query string.
+    const escapedEmail = user.email.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
     const existingCustomer = await stripe.customers.search({
-      query: `email:'${user.email}'`,
+      query: `email:'${escapedEmail}'`,
     });
 
     if (existingCustomer.data.length > 0) {

@@ -56,11 +56,6 @@ export async function POST(req: Request) {
       })),
     });
 
-    // Get the default theme
-    const midnightTheme = await prisma.theme.findFirst({
-      where: { userId: user.id, name: "Midnight" },
-    });
-
     return NextResponse.json(
       {
         user: {

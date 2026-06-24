@@ -44,14 +44,21 @@ export async function POST(req: Request) {
         const userId = session.metadata?.userId;
 
         if (userId) {
-          // Grant Pro badge
-          await prisma.badge.create({
-            data: {
-              userId,
-              type: "PRO",
-              label: "Pro",
-            },
+          // Grant Pro badge — guard against duplicates, since Stripe retries
+          // webhooks and the Badge model has no (userId, type) unique key.
+          const existing = await prisma.badge.findFirst({
+            where: { userId, type: "PRO" },
           });
+
+          if (!existing) {
+            await prisma.badge.create({
+              data: {
+                userId,
+                type: "PRO",
+                label: "Pro",
+              },
+            });
+          }
         }
         break;
       }

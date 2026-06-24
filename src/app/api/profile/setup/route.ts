@@ -58,7 +58,7 @@ export async function POST(req: Request) {
     }
 
     // Create default themes for the user
-    const themes = await prisma.theme.createMany({
+    await prisma.theme.createMany({
       data: defaultThemes.map((theme) => ({
         userId: session.user.id,
         name: theme.name,

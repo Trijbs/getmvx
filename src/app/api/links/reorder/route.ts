@@ -20,6 +20,17 @@ export async function POST(req: Request) {
       );
     }
 
+    // Verify every link belongs to the current user before mutating anything.
+    const ids = links.map((link) => link.id);
+    const owned = await prisma.link.findMany({
+      where: { id: { in: ids }, profile: { userId: session.user.id } },
+      select: { id: true },
+    });
+
+    if (owned.length !== ids.length) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
     // Update positions in a transaction
     await prisma.$transaction(
       links.map((link: { id: string; position: number }) =>

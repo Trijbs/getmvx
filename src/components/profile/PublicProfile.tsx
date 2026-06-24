@@ -12,6 +12,19 @@ interface PublicProfileProps {
   profile: ProfileWithRelations;
 }
 
+// Only allow safe link schemes. A profile owner could otherwise store a
+// `javascript:` URL that would execute in a visitor's browser on click.
+const SAFE_PROTOCOLS = ["http:", "https:", "mailto:"];
+
+function safeUrl(url: string): string | undefined {
+  try {
+    const parsed = new URL(url);
+    return SAFE_PROTOCOLS.includes(parsed.protocol) ? url : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function PublicProfile({ profile }: PublicProfileProps) {
   const config = (profile.theme?.config as Record<string, string>) || {
     background: "#0c0c0e",
@@ -84,10 +97,13 @@ export function PublicProfile({ profile }: PublicProfileProps) {
 
         {/* Links */}
         <div className="flex flex-col gap-3">
-          {profile.links.map((link) => (
+          {profile.links.map((link) => {
+            const href = safeUrl(link.url);
+            if (!href) return null;
+            return (
             <a
               key={link.id}
-              href={link.url}
+              href={href}
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => handleLinkClick(link.id)}
@@ -108,7 +124,8 @@ export function PublicProfile({ profile }: PublicProfileProps) {
               {link.icon && <span>{link.icon}</span>}
               {link.title}
             </a>
-          ))}
+            );
+          })}
         </div>
 
         {/* Footer */}
