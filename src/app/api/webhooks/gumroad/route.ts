@@ -23,6 +23,11 @@ export async function POST(req: NextRequest) {
     const userId = data["url_params[user_id]"];
     const resourceName = data["resource_name"];
     const saleId = data["sale_id"];
+    // Gumroad sends test=true for seller "test" purchases. Those sales aren't
+    // retrievable via the sales API, so we can't verifySale() them — but the
+    // seller_id gate above already proves the ping came from our account, which
+    // is enough to grant a test upgrade.
+    const isTest = data["test"] === "true";
 
     if (!userId) {
       // Log but don't error — test pings from Gumroad won't have user_id.
@@ -33,10 +38,10 @@ export async function POST(req: NextRequest) {
     switch (resourceName) {
       case "sale":
       case "subscription_restarted": {
-        // Confirm a real sale with Gumroad before granting. Subscription
-        // restarts may arrive without a sale_id; the seller_id gate above
-        // already authenticated those.
-        if (saleId && !(await verifySale(saleId))) {
+        // Confirm a real sale with Gumroad before granting. Test purchases skip
+        // this (no API record); subscription restarts may arrive without a
+        // sale_id; the seller_id gate above already authenticated both.
+        if (!isTest && saleId && !(await verifySale(saleId))) {
           console.warn("[gumroad webhook] rejected: sale failed verification", {
             saleId,
           });
