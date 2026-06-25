@@ -11,10 +11,25 @@ export async function POST(req: NextRequest) {
       string
     >;
 
+    // ── TEMP DIAGNOSTIC LOGGING (remove once the flow is confirmed) ──────────
+    // Dump the entire incoming payload so we can see exactly what Gumroad sends
+    // — field names, whether user_id is echoed, the test flag, seller_id, etc.
+    console.log("[gumroad webhook] === incoming ping ===");
+    console.log("[gumroad webhook] keys:", Object.keys(data).join(", "));
+    console.log("[gumroad webhook] payload:", JSON.stringify(data));
+    // ────────────────────────────────────────────────────────────────────────
+
     // AUTHENTICITY GATE: every ping must carry our seller_id. Without this the
     // endpoint is a free-Pro button — anyone could POST a fake "sale".
-    if (!verifySellerId(data["seller_id"])) {
-      console.warn("[gumroad webhook] rejected: seller_id mismatch");
+    const sellerId = data["seller_id"];
+    const sellerOk = verifySellerId(sellerId);
+    console.log("[gumroad webhook] seller_id check:", {
+      received: sellerId ?? "(none)",
+      envSet: Boolean(process.env.GUMROAD_SELLER_ID),
+      ok: sellerOk,
+    });
+    if (!sellerOk) {
+      console.warn("[gumroad webhook] REJECT 401: seller_id mismatch/missing");
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
@@ -29,9 +44,20 @@ export async function POST(req: NextRequest) {
     // is enough to grant a test upgrade.
     const isTest = data["test"] === "true";
 
+    console.log("[gumroad webhook] parsed:", {
+      resourceName,
+      userId: userId ?? "(MISSING)",
+      saleId: saleId ?? "(none)",
+      isTest,
+      urlParamKeys: Object.keys(data).filter((k) => k.startsWith("url_params")),
+    });
+
     if (!userId) {
-      // Log but don't error — test pings from Gumroad won't have user_id.
-      console.warn("[gumroad webhook] missing user_id", { resourceName, saleId });
+      console.warn(
+        "[gumroad webhook] NO user_id — ping can't be mapped to an account. " +
+          "Either checkout didn't go through the in-app button, or Gumroad " +
+          "isn't echoing url_params. Returning 200 without granting."
+      );
       return NextResponse.json({ received: true });
     }
 
@@ -41,32 +67,37 @@ export async function POST(req: NextRequest) {
         // Confirm a real sale with Gumroad before granting. Test purchases skip
         // this (no API record); subscription restarts may arrive without a
         // sale_id; the seller_id gate above already authenticated both.
-        if (!isTest && saleId && !(await verifySale(saleId))) {
-          console.warn("[gumroad webhook] rejected: sale failed verification", {
-            saleId,
-          });
-          return NextResponse.json(
-            { error: "Sale verification failed" },
-            { status: 400 }
-          );
+        if (!isTest && saleId) {
+          const saleOk = await verifySale(saleId);
+          console.log("[gumroad webhook] verifySale:", { saleId, ok: saleOk });
+          if (!saleOk) {
+            console.warn("[gumroad webhook] REJECT 400: sale failed verification");
+            return NextResponse.json(
+              { error: "Sale verification failed" },
+              { status: 400 }
+            );
+          }
         }
         await setProStatus(userId, true);
+        console.log("[gumroad webhook] GRANTED Pro ->", userId);
         break;
       }
 
       case "subscription_ended":
       case "cancellation":
         await setProStatus(userId, false);
+        console.log("[gumroad webhook] REVOKED Pro ->", userId);
         break;
 
       // subscription_updated — no access change, ignore.
       default:
+        console.log("[gumroad webhook] ignored resource_name:", resourceName);
         break;
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("[gumroad webhook] error", error);
+    console.error("[gumroad webhook] ERROR", error);
     // Return 500 so Gumroad retries (it retries on non-200 for up to 3 hours).
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
