@@ -72,9 +72,10 @@ model Profile {
   viewCount  Int     @default(0)
   themeId    String?
 
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  links Link[]
-  theme Theme? @relation(fields: [themeId], references: [id])
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links   Link[]
+  widgets Widget[]
+  theme   Theme?   @relation(fields: [themeId], references: [id])
 
   @@index([username])
 }
@@ -130,6 +131,20 @@ model File {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+}
+
+model Widget {
+  id        String  @id @default(cuid())
+  profileId String
+  type      String
+  label     String
+  enabled   Boolean @default(true)
+  config    Json    @default("{}")
+  position  Int     @default(0)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
 }
 
 model AnalyticsEvent {

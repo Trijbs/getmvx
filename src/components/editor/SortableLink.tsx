@@ -8,9 +8,10 @@ interface SortableLinkProps {
   link: Link;
   onDelete: (id: string) => void;
   onToggle: (id: string, isActive: boolean) => void;
+  onEdit: (id: string) => void;
 }
 
-export function SortableLink({ link, onDelete, onToggle }: SortableLinkProps) {
+export function SortableLink({ link, onDelete, onToggle, onEdit }: SortableLinkProps) {
   const {
     attributes,
     listeners,
@@ -64,10 +65,20 @@ export function SortableLink({ link, onDelete, onToggle }: SortableLinkProps) {
         {link.isActive ? "ON" : "OFF"}
       </button>
 
+      {/* Edit */}
+      <button
+        onClick={() => onEdit(link.id)}
+        className="text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+        aria-label="Edit link"
+      >
+        ✎
+      </button>
+
       {/* Delete */}
       <button
         onClick={() => onDelete(link.id)}
         className="text-[var(--muted)] transition-colors hover:text-[var(--red)]"
+        aria-label="Delete link"
       >
         ✕
       </button>

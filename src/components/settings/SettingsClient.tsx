@@ -2,14 +2,17 @@
 
 import { useState } from "react";
 import type { Profile } from "../../../prisma/generated/prisma/client";
+import { UpgradeButton } from "@/components/pro/UpgradeButton";
 
 interface SettingsClientProps {
   profile: Profile;
   user: { id: string; name?: string | null; email?: string | null };
+  isPro: boolean;
 }
 
-export function SettingsClient({ profile, user }: SettingsClientProps) {
-  const [username, setUsername] = useState(profile.username);
+export function SettingsClient({ profile, user, isPro }: SettingsClientProps) {
+  // Username is fixed after setup, so it's read straight from the profile.
+  const username = profile.username;
   const [bio, setBio] = useState(profile.bio || "");
   const [isPublic, setIsPublic] = useState(profile.isPublic);
   const [saving, setSaving] = useState(false);
@@ -119,6 +122,33 @@ export function SettingsClient({ profile, user }: SettingsClientProps) {
             </a>
           </div>
         </div>
+      </section>
+
+      {/* Pro plan */}
+      <section className="mb-6 rounded-[14px] border border-[var(--border)] bg-[var(--bg2)] p-5">
+        <h2 className="mb-4 text-sm font-600">Plan</h2>
+        {isPro ? (
+          <div className="flex items-center gap-3">
+            <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-700 text-[var(--bg)]">
+              PRO
+            </span>
+            <p className="text-sm text-[var(--muted)]">
+              You&apos;re on the Pro plan. Thanks for supporting mvx!
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-500">mvx Pro</p>
+              <p className="text-xs text-[var(--muted)]">
+                Custom themes, CSS, analytics, widgets &amp; more — €3.99/mo
+              </p>
+            </div>
+            {user.id && user.email && (
+              <UpgradeButton userId={user.id} email={user.email ?? ""} />
+            )}
+          </div>
+        )}
       </section>
 
       {/* Save button */}

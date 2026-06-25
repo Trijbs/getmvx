@@ -8,6 +8,7 @@ interface ProfilePreviewCardProps {
   links: Link[];
   themeId: string;
   themes: Theme[];
+  fontFamily?: string;
 }
 
 export function ProfilePreviewCard({
@@ -16,6 +17,7 @@ export function ProfilePreviewCard({
   links,
   themeId,
   themes,
+  fontFamily,
 }: ProfilePreviewCardProps) {
   const theme = themes.find((t) => t.id === themeId);
   const config = (theme?.config as Record<string, string>) || {
@@ -36,6 +38,7 @@ export function ProfilePreviewCard({
       style={{
         background: config.background,
         borderColor: config.borderColor,
+        fontFamily: fontFamily ?? config.fontFamily ?? undefined,
       }}
     >
       {/* Banner */}

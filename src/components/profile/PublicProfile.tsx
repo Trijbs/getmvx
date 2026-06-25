@@ -26,6 +26,22 @@ function safeUrl(url: string): string | undefined {
   }
 }
 
+// Group links by groupId, preserving original order.
+// Returns [{groupId: string | null, links: Link[]}]
+function groupLinks(links: Link[]): { groupId: string | null; links: Link[] }[] {
+  const groups: { groupId: string | null; links: Link[] }[] = [];
+  for (const link of links) {
+    const gid = link.groupId ?? null;
+    const existing = groups.find((g) => g.groupId === gid);
+    if (existing) {
+      existing.links.push(link);
+    } else {
+      groups.push({ groupId: gid, links: [link] });
+    }
+  }
+  return groups;
+}
+
 export function PublicProfile({ profile }: PublicProfileProps) {
   const config = (profile.theme?.config as Record<string, string>) || {
     background: "#0c0c0e",
@@ -38,7 +54,11 @@ export function PublicProfile({ profile }: PublicProfileProps) {
     fontFamily: "Inter",
   };
 
-  async function handleLinkClick(linkId: string) {
+  const layoutType = profile.layoutType || "centered";
+  const isGrid = layoutType === "grid";
+  const isMinimal = layoutType === "minimal";
+
+  function handleLinkClick(linkId: string) {
     // Track click
     fetch("/api/analytics/click", {
       method: "POST",
@@ -46,6 +66,53 @@ export function PublicProfile({ profile }: PublicProfileProps) {
       body: JSON.stringify({ linkId, profileId: profile.id }),
     }).catch(() => {});
   }
+
+  function renderLink(link: Link) {
+    const href = safeUrl(link.url);
+    if (!href) return null;
+
+    const minimalStyle: React.CSSProperties = {
+      background: "transparent",
+      border: "none",
+      borderBottom: `1px solid ${config.borderColor || "rgba(255,255,255,0.07)"}`,
+      borderRadius: 0,
+      color: config.textColor,
+      justifyContent: "flex-start",
+      paddingLeft: 0,
+      paddingRight: 0,
+    };
+
+    const filledStyle: React.CSSProperties = {
+      background:
+        config.buttonStyle === "outlined" || config.buttonStyle === "neon"
+          ? "transparent"
+          : `${config.accentColor}15`,
+      border: `1px solid ${config.accentColor}40`,
+      color: config.accentColor,
+      boxShadow:
+        config.buttonStyle === "neon"
+          ? `0 0 15px ${config.accentColor}30`
+          : "none",
+    };
+
+    return (
+      <a
+        key={link.id}
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={() => handleLinkClick(link.id)}
+        className="flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-500 transition-all hover:brightness-110"
+        style={isMinimal ? minimalStyle : filledStyle}
+      >
+        {link.icon && <span>{link.icon}</span>}
+        {link.title}
+      </a>
+    );
+  }
+
+  const activeLinks = profile.links.filter((l) => l.isActive !== false);
+  const grouped = groupLinks(activeLinks);
 
   return (
     <div
@@ -55,9 +122,9 @@ export function PublicProfile({ profile }: PublicProfileProps) {
         fontFamily: `var(--font-${config.fontFamily?.toLowerCase() || "inter"})`,
       }}
     >
-      <div className="mx-auto max-w-[480px]">
+      <div className={`mx-auto ${isGrid ? "max-w-[720px]" : "max-w-[480px]"}`}>
         {/* Header */}
-        <div className="mb-6 text-center">
+        <div className={`mb-6 ${isGrid ? "text-left" : "text-center"}`}>
           {profile.avatarUrl ? (
             // User-supplied avatar from an arbitrary external host (R2 / custom
             // domain). next/image would require per-host remotePatterns config,
@@ -66,11 +133,11 @@ export function PublicProfile({ profile }: PublicProfileProps) {
             <img
               src={profile.avatarUrl}
               alt={profile.username}
-              className="mx-auto mb-4 h-20 w-20 rounded-full object-cover"
+              className={`mb-4 h-20 w-20 rounded-full object-cover ${isGrid ? "" : "mx-auto"}`}
             />
           ) : (
             <div
-              className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-full text-3xl font-700"
+              className={`mb-4 flex h-20 w-20 items-center justify-center rounded-full text-3xl font-700 ${isGrid ? "" : "mx-auto"}`}
               style={{ background: config.accentColor, color: config.background }}
             >
               {profile.username.charAt(0).toUpperCase()}
@@ -92,7 +159,7 @@ export function PublicProfile({ profile }: PublicProfileProps) {
 
           {profile.bio && (
             <p
-              className="mx-auto mt-3 max-w-[360px] text-sm leading-relaxed"
+              className={`mt-3 text-sm leading-relaxed ${isGrid ? "" : "mx-auto max-w-[360px]"}`}
               style={{ color: config.mutedColor }}
             >
               {profile.bio}
@@ -100,38 +167,46 @@ export function PublicProfile({ profile }: PublicProfileProps) {
           )}
         </div>
 
-        {/* Links */}
-        <div className="flex flex-col gap-3">
-          {profile.links.map((link) => {
-            const href = safeUrl(link.url);
-            if (!href) return null;
-            return (
-            <a
-              key={link.id}
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => handleLinkClick(link.id)}
-              className="flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-500 transition-all hover:brightness-110"
-              style={{
-                background:
-                  config.buttonStyle === "outlined" || config.buttonStyle === "neon"
-                    ? "transparent"
-                    : `${config.accentColor}15`,
-                border: `1px solid ${config.accentColor}40`,
-                color: config.accentColor,
-                boxShadow:
-                  config.buttonStyle === "neon"
-                    ? `0 0 15px ${config.accentColor}30`
-                    : "none",
-              }}
-            >
-              {link.icon && <span>{link.icon}</span>}
-              {link.title}
-            </a>
-            );
-          })}
-        </div>
+        {/* Links — layout branches here */}
+        {isGrid ? (
+          // Grid layout: 2-col grid per section
+          <div>
+            {grouped.map(({ groupId: gid, links: gLinks }) => (
+              <div key={gid ?? "__default__"} className="mb-6">
+                {gid && (
+                  <p
+                    className="mb-3 text-xs font-600 uppercase tracking-widest"
+                    style={{ color: config.mutedColor }}
+                  >
+                    {gid}
+                  </p>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                  {gLinks.map((link) => renderLink(link))}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          // Centered / Minimal layout: single column, with section headers
+          <div className="flex flex-col gap-0">
+            {grouped.map(({ groupId: gid, links: gLinks }) => (
+              <div key={gid ?? "__default__"} className="mb-4">
+                {gid && !isMinimal && (
+                  <p
+                    className="mb-2 text-xs font-600 uppercase tracking-widest"
+                    style={{ color: config.mutedColor }}
+                  >
+                    {gid}
+                  </p>
+                )}
+                <div className={`flex flex-col ${isMinimal ? "gap-0" : "gap-3"}`}>
+                  {gLinks.map((link) => renderLink(link))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="mt-10 text-center">

@@ -16,8 +16,9 @@ export async function PATCH(req: Request) {
       customCss?: string;
       layoutType?: string;
       isPublic?: boolean;
+      avatarUrl?: string;
     };
-    const { bio, themeId, customCss, layoutType } = body;
+    const { bio, themeId, customCss, layoutType, isPublic, avatarUrl } = body;
 
     const profile = await prisma.profile.findUnique({
       where: { userId: session.user.id },
@@ -40,6 +41,8 @@ export async function PATCH(req: Request) {
           customCss: sanitizeCustomCss(customCss),
         }),
         ...(layoutType !== undefined && { layoutType }),
+        ...(isPublic !== undefined && { isPublic }),
+        ...(avatarUrl !== undefined && { avatarUrl }),
       },
     });
 

@@ -20,28 +20,49 @@ const socialIcons: Record<string, string> = {
   "💡": "Portfolio",
 };
 
+type LinkData = { title: string; url: string; icon?: string; groupId?: string };
+
 interface AddLinkModalProps {
-  onAdd: (data: { title: string; url: string; icon?: string }) => void;
+  /** Present when editing an existing link */
+  initialData?: { id: string } & LinkData;
+  /** Available section names derived from existing links */
+  sections?: string[];
+  onAdd?: (data: LinkData) => void;
+  onEdit?: (id: string, data: LinkData) => void;
   onClose: () => void;
 }
 
-export function AddLinkModal({ onAdd, onClose }: AddLinkModalProps) {
-  const [title, setTitle] = useState("");
-  const [url, setUrl] = useState("");
-  const [icon, setIcon] = useState("🔗");
+export function AddLinkModal({
+  initialData,
+  sections = [],
+  onAdd,
+  onEdit,
+  onClose,
+}: AddLinkModalProps) {
+  const isEditing = Boolean(initialData);
+  const [title, setTitle] = useState(initialData?.title ?? "");
+  const [url, setUrl] = useState(initialData?.url ?? "");
+  const [icon, setIcon] = useState(initialData?.icon ?? "🔗");
+  const [groupId, setGroupId] = useState(initialData?.groupId ?? "");
   const [showIcons, setShowIcons] = useState(false);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!title || !url) return;
-    onAdd({ title, url, icon });
+    const data: LinkData = { title, url, icon, groupId: groupId || undefined };
+
+    if (isEditing && initialData && onEdit) {
+      onEdit(initialData.id, data);
+    } else if (onAdd) {
+      onAdd(data);
+    }
   }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
       <div className="w-full max-w-[420px] rounded-[16px] border border-[var(--border2)] bg-[var(--bg2)] p-6">
         <h2 className="mb-4 font-[family-name:var(--font-barlow)] text-lg font-700">
-          Add link
+          {isEditing ? "Edit link" : "Add link"}
         </h2>
 
         <form onSubmit={handleSubmit}>
@@ -96,7 +117,7 @@ export function AddLinkModal({ onAdd, onClose }: AddLinkModalProps) {
           </div>
 
           {/* URL */}
-          <div className="mb-6">
+          <div className="mb-4">
             <label className="mb-1.5 block text-sm font-500">URL</label>
             <input
               type="url"
@@ -106,6 +127,28 @@ export function AddLinkModal({ onAdd, onClose }: AddLinkModalProps) {
               className="w-full rounded-lg border border-[var(--border2)] bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
               placeholder="https://example.com"
             />
+          </div>
+
+          {/* Section */}
+          <div className="mb-6">
+            <label className="mb-1.5 block text-sm font-500">
+              Section <span className="text-[var(--muted)] font-400">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={groupId}
+              onChange={(e) => setGroupId(e.target.value)}
+              list="section-suggestions"
+              className="w-full rounded-lg border border-[var(--border2)] bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+              placeholder="e.g. Social, Work…"
+            />
+            {sections.length > 0 && (
+              <datalist id="section-suggestions">
+                {sections.map((s) => (
+                  <option key={s} value={s} />
+                ))}
+              </datalist>
+            )}
           </div>
 
           {/* Actions */}
@@ -121,7 +164,7 @@ export function AddLinkModal({ onAdd, onClose }: AddLinkModalProps) {
               type="submit"
               className="flex-1 rounded-lg bg-[var(--accent)] px-4 py-2.5 text-sm font-600 text-[var(--bg)] transition-all hover:bg-[var(--accent2)]"
             >
-              Add link
+              {isEditing ? "Save changes" : "Add link"}
             </button>
           </div>
         </form>
