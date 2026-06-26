@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 
 export default function RegisterPage() {
@@ -37,19 +36,8 @@ export default function RegisterPage() {
         return;
       }
 
-      // Auto sign in after registration
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        setError("Account created but sign-in failed. Try logging in.");
-        setLoading(false);
-      } else {
-        window.location.href = "/onboarding";
-      }
+      // Redirect to check-email — user must verify before they can sign in.
+      window.location.href = `/check-email?email=${encodeURIComponent(email)}`;
     } catch {
       setError("Something went wrong. Please try again.");
       setLoading(false);

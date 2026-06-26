@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { sendTransactionalEmail } from "@/lib/brevo";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 function waitlistEmailHtml(): string {
   return `
@@ -27,6 +28,14 @@ function waitlistEmailHtml(): string {
 
 export async function POST(req: Request) {
   try {
+    const rl = await rateLimit(`waitlist:${clientIp(req)}`, 5, 60);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const { email, role } = (await req.json()) as {
       email: string;
       role?: string;

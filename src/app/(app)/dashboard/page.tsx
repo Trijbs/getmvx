@@ -44,7 +44,7 @@ export default async function DashboardPage() {
           </p>
         </div>
         <a
-          href={`/u/${profile.username}`}
+          href={`/${profile.username}`}
           target="_blank"
           className="flex items-center gap-2 rounded-lg border border-[var(--border2)] bg-[var(--bg2)] px-4 py-2 text-sm font-500 text-[var(--text)] transition-all hover:bg-[var(--bg3)]"
         >

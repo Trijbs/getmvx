@@ -114,11 +114,11 @@ export function SettingsClient({ profile, user, isPro }: SettingsClientProps) {
           <div className="flex items-center justify-between">
             <span className="text-sm text-[var(--muted)]">Profile URL</span>
             <a
-              href={`/u/${profile.username}`}
+              href={`/${profile.username}`}
               target="_blank"
               className="text-sm text-[var(--accent)] hover:underline"
             >
-              getmvx.cc/u/{profile.username}
+              getmvx.cc/{profile.username}
             </a>
           </div>
         </div>

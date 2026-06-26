@@ -2,9 +2,19 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { defaultThemes } from "@/lib/themes";
+import { isReservedUsername } from "@/lib/reserved-usernames";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 export async function POST(req: Request) {
   try {
+    const rl = await rateLimit(`profile-setup:${clientIp(req)}`, 10, 60);
+    if (!rl.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const session = await auth();
 
     if (!session?.user?.id) {
@@ -29,6 +39,13 @@ export async function POST(req: Request) {
           error:
             "Username can only contain lowercase letters, numbers, hyphens, and underscores",
         },
+        { status: 400 }
+      );
+    }
+
+    if (isReservedUsername(username)) {
+      return NextResponse.json(
+        { error: "This username is not available" },
         { status: 400 }
       );
     }

@@ -30,6 +30,7 @@
     "react-dom": "19.2.4",
     "react-is": "^19.2.7",
     "recharts": "^3.8.1",
+    "@sentry/nextjs": "^9",
     "stripe": "^22.2.1"
   },
   "devDependencies": {
