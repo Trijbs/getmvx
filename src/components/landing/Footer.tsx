@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { LogoMark } from "@/components/brand";
 
 export function Footer() {
@@ -14,6 +15,16 @@ export function Footer() {
         <p className="font-[family-name:var(--font-dm-mono)] text-xs tracking-wide text-[var(--muted)]">
           Your identity, fully yours.
         </p>
+
+        <div className="flex items-center gap-4 text-[13px] text-[var(--muted)]">
+          <Link href="/terms" className="hover:text-[var(--text)] transition-colors">
+            Terms
+          </Link>
+          <span>·</span>
+          <Link href="/privacy" className="hover:text-[var(--text)] transition-colors">
+            Privacy
+          </Link>
+        </div>
 
         <p className="text-[13px] text-[var(--muted)]">
           MVX by{" "}
