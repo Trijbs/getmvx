@@ -16,6 +16,8 @@ export const RESERVED_USERNAMES = new Set([
   "onboarding",
   "forgot-password",
   "reset-password",
+  "verify-email",
+  "check-email",
   // App group routes
   "dashboard",
   "editor",

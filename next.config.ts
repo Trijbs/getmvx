@@ -20,7 +20,7 @@ export default withSentryConfig(nextConfig, {
   silent: !process.env.CI,
 
   // Upload source maps to Sentry so stack traces show original TypeScript.
-  // The auth token comes from SENTRY_AUTH_TOKEN (set in Cloudflare Pages env).
+  // The auth token comes from SENTRY_AUTH_TOKEN (set in the Vercel project env).
   widenClientFileUpload: true,
 
   // Tree-shake unused Sentry code in the client bundle.

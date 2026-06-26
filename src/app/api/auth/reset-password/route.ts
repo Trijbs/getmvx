@@ -54,9 +54,11 @@ export async function POST(req: Request) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Completing a reset proves control of the inbox, so also mark the email
+    // verified — otherwise the login gate could still lock this user out.
     await prisma.user.update({
       where: { email },
-      data: { passwordHash },
+      data: { passwordHash, emailVerified: new Date() },
     });
 
     await prisma.verificationToken.delete({ where: { token } });
