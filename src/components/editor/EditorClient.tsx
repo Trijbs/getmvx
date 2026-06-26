@@ -563,7 +563,7 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
       </div>
 
       {/* ── Right — Live preview ── */}
-      <div className="sticky top-8 hidden lg:block">
+      <div className="sticky top-8 self-start hidden lg:block">
         <p className="mb-3 text-xs font-500 text-[var(--muted)]">Live preview</p>
         <ProfilePreviewCard
           username={profile.username}

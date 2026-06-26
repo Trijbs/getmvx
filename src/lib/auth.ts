@@ -47,6 +47,10 @@ export const {
 
         if (!isValid) return null;
 
+        // Block unverified credentials users. OAuth accounts (Google/Discord)
+        // are trusted — they don't have a passwordHash path here.
+        if (!user.emailVerified) return null;
+
         return {
           id: user.id,
           email: user.email,
