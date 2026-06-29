@@ -1,0 +1,31 @@
+MVX — Proprietary Software License
+Copyright (c) 2026 Trijbs. All rights reserved.
+
+MVX and its associated source code, design, assets, and documentation
+(collectively, the "Software") are the proprietary and confidential property of
+the copyright holder. The Software is made publicly viewable for transparency
+and reference purposes only. It is NOT open-source software.
+
+NO LICENSE OR PERMISSION IS GRANTED. Except where required by applicable law or
+expressly authorized in writing by the copyright holder, you may NOT:
+
+  1. use, run, or deploy the Software or any part of it, in whole or in part,
+     for any purpose;
+  2. copy, reproduce, or store the Software except as strictly necessary to
+     view it on the hosting platform;
+  3. modify, adapt, translate, or create derivative works based on the Software;
+  4. distribute, publish, sublicense, sell, rent, lease, or otherwise transfer
+     the Software or access to it;
+  5. remove or alter any proprietary notices, trademarks, or attributions.
+
+The names "MVX", "getmvx.cc", and associated logos and branding are trademarks
+of the copyright holder and may not be used without prior written permission.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE COPYRIGHT
+HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES, OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT, OR OTHERWISE, ARISING FROM, OUT OF, OR IN CONNECTION
+WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+For licensing inquiries, contact the copyright holder via https://getmvx.cc.
