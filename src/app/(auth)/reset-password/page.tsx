@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -16,11 +16,9 @@ function ResetPasswordForm() {
   const [confirm, setConfirm] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done">("idle");
   const [error, setError] = useState("");
-  const [invalid, setInvalid] = useState(false);
 
-  useEffect(() => {
-    if (!token || !email) setInvalid(true);
-  }, [token, email]);
+  // Derived from URL params — no state/effect needed.
+  const invalid = !token || !email;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

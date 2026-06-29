@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Build/verify job only reads the repo — keep the token least-privileged.
+permissions:
+  contents: read
+
+# Cancel in-progress runs for the same ref to save minutes
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, typecheck, build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+        env:
+          # Dummy build-time values. The build does not query the database
+          # (verified: it builds with no DATABASE_URL), but NextAuth reads these
+          # during module init. Never put real secrets here — use GitHub Actions
+          # secrets if a future build step needs one.
+          NEXTAUTH_SECRET: build-time-placeholder-not-a-real-secret
+          NEXTAUTH_URL: http://localhost:3000

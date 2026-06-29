@@ -59,7 +59,7 @@ export function Features() {
   return (
     <section id="features" className="mx-auto max-w-[1280px] px-[5%] py-25">
       <span className="mb-4 block font-[family-name:var(--font-dm-mono)] text-xs tracking-[0.1em] text-[var(--accent)]">
-        // what you get
+        {"// what you get"}
       </span>
       <h2 className="mb-4 font-[family-name:var(--font-barlow)] text-[clamp(36px,4vw,54px)] font-800 leading-tight">
         Everything you need.

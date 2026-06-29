@@ -36,7 +36,7 @@ export function Waitlist() {
     <section className="border-y border-[var(--border)] bg-[linear-gradient(180deg,var(--bg2),var(--bg3))] py-25">
       <div className="mx-auto max-w-[600px] px-[5%] text-center">
         <span className="mb-4 block font-[family-name:var(--font-dm-mono)] text-xs tracking-[0.1em] text-[var(--accent)]">
-          // early access
+          {"// early access"}
         </span>
         <h2 className="mb-4 font-[family-name:var(--font-barlow)] text-[clamp(36px,4vw,54px)] font-800 leading-tight">
           Be first in line.

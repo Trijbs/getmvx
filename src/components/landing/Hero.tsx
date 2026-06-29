@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { HeroMark } from "@/components/brand";
 import { ProfilePreview } from "./ProfilePreview";
 
@@ -60,12 +61,12 @@ export function Hero() {
         </p>
 
         <div className="flex flex-wrap gap-3">
-          <a
+          <Link
             href="/register"
             className="inline-block rounded-[10px] bg-[var(--accent)] px-8 py-3.5 text-[15px] font-600 text-[var(--bg)] transition-all hover:-translate-y-0.5 hover:bg-[var(--accent2)]"
           >
             Create your page, it&apos;s free
-          </a>
+          </Link>
           <a
             href="#pricing"
             className="inline-block rounded-[10px] border border-[var(--border2)] bg-transparent px-8 py-3.5 text-[15px] font-500 text-[var(--muted)] transition-all hover:border-white/25 hover:text-[var(--text)]"
