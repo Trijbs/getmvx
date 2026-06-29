@@ -163,7 +163,7 @@ async function main() {
     // Default themes have no userId — they're global templates
     // We'll store them with a special system user or as standalone
     // For now, skip if already exists by name
-    const existing = await (prisma as any).theme.findFirst({
+    const existing = await prisma.theme.findFirst({
       where: { name: theme.name, isDefault: true },
     });
 

@@ -55,7 +55,7 @@ export function WidgetPicker({ widgets, onChange }: WidgetPickerProps) {
       onChange([
         ...widgets,
         {
-          id: Date.now().toString(),
+          id: crypto.randomUUID(),
           type: type as Widget["type"],
           label: widgetOptions.find((w) => w.type === type)?.label || type,
           enabled: true,

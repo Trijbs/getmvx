@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export function Pricing() {
   return (
     <section id="pricing" className="mx-auto max-w-[1100px] px-[5%] py-25 text-center">
@@ -60,12 +62,12 @@ export function Pricing() {
               </li>
             ))}
           </ul>
-      <a
+      <Link
         href="/register"
         className="block w-full rounded-[10px] border border-[var(--border2)] bg-transparent py-3.5 text-center text-[15px] font-600 text-[var(--text)] transition-all hover:border-white/25"
       >
         Start for free
-      </a>
+      </Link>
         </div>
 
         {/* PRO */}
@@ -112,12 +114,12 @@ export function Pricing() {
               </li>
             ))}
           </ul>
-      <a
+      <Link
         href="/register"
         className="block w-full rounded-[10px] bg-[var(--accent)] py-3.5 text-center text-[15px] font-600 text-[var(--bg)] transition-all hover:bg-[var(--accent2)]"
       >
         Get Pro for €3.99/mo
-      </a>
+      </Link>
         </div>
       </div>
     </section>

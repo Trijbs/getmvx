@@ -6,6 +6,7 @@ import {
   useId,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
   type KeyboardEvent,
 } from "react";
@@ -83,18 +84,18 @@ const TYPOGRAPHY_FONTS = [
 
 const LINKS = ["✦ Portfolio", "📩 Book a project", "🖼 Behance work"] as const;
 
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
 function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const onChange = () => setReduced(mq.matches);
-    mq.addEventListener("change", onChange);
-    return () => mq.removeEventListener("change", onChange);
-  }, []);
-
-  return reduced;
+  return useSyncExternalStore(
+    (onChange) => {
+      const mq = window.matchMedia(REDUCED_MOTION_QUERY);
+      mq.addEventListener("change", onChange);
+      return () => mq.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
+    () => false, // SSR fallback: assume motion is allowed
+  );
 }
 
 function Spotlight({
@@ -330,7 +331,7 @@ export function Customize() {
         {/* Left — header + tabs */}
         <div>
           <span className="mb-4 block font-[family-name:var(--font-dm-mono)] text-xs tracking-[0.1em] text-[var(--accent)]">
-            // make it yours
+            {"// make it yours"}
           </span>
           <h2 className="mb-4 font-[family-name:var(--font-barlow)] text-[clamp(36px,4vw,54px)] font-800 leading-tight">
             Fully customizable.

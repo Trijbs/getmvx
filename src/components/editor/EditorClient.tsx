@@ -307,7 +307,7 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
       if (!uploadRes.ok) throw new Error("Upload failed");
 
       // 3. Save URL on profile — append cache-buster so the browser re-fetches
-      const finalUrl = `${publicUrl}?v=${Date.now()}`;
+      const finalUrl = `${publicUrl}?v=${crypto.randomUUID()}`;
       await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },

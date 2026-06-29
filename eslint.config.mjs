@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Generated Cloudflare / OpenNext build output (gitignored, not source).
+    // Without these, `eslint` crawls thousands of bundled files, making lint
+    // extremely slow and failing on machine-generated code.
+    ".open-next/**",
+    ".wrangler/**",
   ]),
 ]);
 
