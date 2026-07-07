@@ -7,6 +7,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
 model User {
   id            String    @id @default(cuid())
   email         String    @unique
@@ -17,12 +23,51 @@ model User {
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 
+  // Admin & moderation (ADMIN_PLAN.md §4.1)
+  role            Role      @default(USER)
+  suspendedAt     DateTime?
+  suspendedReason String?
+  adminNote       String?   @db.Text
+
+  // First-class Pro state; Badge is display-only. Written by the Gumroad
+  // webhook, reconciled against Gumroad by the admin billing view.
+  proSince DateTime?
+  proUntil DateTime?
+
   profile      Profile?
   badges       Badge[]
   files        File[]
   themes       Theme[]
   accounts     Account[]
   sessions     Session[]
+}
+
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  actorId    String // admin user id; denied /admin probes log the probing user's id
+  action     String // e.g. "user.suspend", "profile.takedown", "admin.access_denied"
+  targetType String // "user" | "profile" | "link" | "report" | "route"
+  targetId   String
+  metadata   Json     @default("{}")
+  createdAt  DateTime @default(now())
+
+  @@index([actorId, createdAt])
+  @@index([targetType, targetId])
+}
+
+model Report {
+  id         String    @id @default(cuid())
+  targetType String // "profile" | "link"
+  targetId   String
+  reporterId String? // null = system-generated
+  reason     String
+  details    String?   @db.Text
+  status     String    @default("open") // open | actioned | dismissed
+  resolvedBy String?
+  createdAt  DateTime  @default(now())
+  resolvedAt DateTime?
+
+  @@index([status, createdAt])
 }
 
 model Account {

@@ -14,7 +14,8 @@
     "lint": "eslint",
     "pages:build": "npx @opennextjs/cloudflare",
     "pages:deploy": "npx @opennextjs/cloudflare && wrangler pages deploy",
-    "pages:dev": "wrangler pages dev"
+    "pages:dev": "wrangler pages dev",
+    "test": "vitest run"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
@@ -44,6 +45,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
-    "typescript": "^6"
+    "typescript": "^6",
+    "vitest": "^4.1.10"
   }
 }

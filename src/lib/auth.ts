@@ -61,15 +61,32 @@ export const {
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id;
+        // Read the role once at sign-in. This claim is a cheap first filter
+        // only — requireAdmin() re-checks the DB on every admin request, so a
+        // stale token can't hold on to (or fake) privileges there.
+        const dbUser = user.id
+          ? await prisma.user.findUnique({
+              where: { id: user.id },
+              select: { role: true },
+            })
+          : null;
+        token.role = dbUser?.role ?? "USER";
+      }
+      if (account) {
+        // Which provider authenticated this session ("credentials", "google",
+        // "discord"). Used by the ADMIN_REQUIRE_OAUTH gate in lib/admin.ts.
+        token.provider = account.provider;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user && token.id) {
-        (session.user as { id: string }).id = token.id as string;
+        session.user.id = token.id as string;
+        session.user.role = (token.role as string | undefined) ?? "USER";
+        session.user.provider = token.provider as string | undefined;
       }
       return session;
     },

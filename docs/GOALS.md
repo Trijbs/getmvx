@@ -34,7 +34,7 @@ The core product is **built and deployed on Vercel**: auth (credentials + Google
 1. **Brand icon & identity system** — replacing placeholder iconography with a coherent brand icon set (`ICON_PLAN.md`, `src/components/brand/`). In progress.
 2. **Legal finalization** — polishing Privacy Policy and Terms of Service drafts (`PRIVACY_POLICY.md`, `TERMS_OF_SERVICE.md`, plan in `LEGAL_PLAN.md`) and wiring the final text into `/privacy` and `/terms`. Required before charging real money.
 3. **Editor expansion** — remaining phases of `EDITOR_EXPANSION_PLAN.md`: widget persistence polish, layout type selector, link groups/sections, unsaved-changes UX, auto-save.
-4. **Admin console** — internal `/admin` surface (plan: `ADMIN_PLAN.md`, local): Phase 0 adds a `Role` enum, audit log, and hardened gate; then user management, moderation queue, metrics + waitlist export, and Gumroad billing reconcile. Waitlist export is launch-relevant.
+4. **Admin console** — internal `/admin` surface (plan: `ADMIN_PLAN.md`, local). **Phase 0 shipped** (`Role` enum, `AdminAuditLog`/`Report` models, hardened 404 gate with DB re-check + IP allowlist, first tests). Next: Phase 3 metrics + waitlist export (launch-relevant), then user management, moderation, billing reconcile.
 
 ### Remaining launch checklist
 
@@ -48,7 +48,7 @@ The core product is **built and deployed on Vercel**: auth (credentials + Google
 ## Engineering goals (ongoing)
 
 - **Keep CI green**: lint + `tsc --noEmit` + build on every PR; dependabot PRs get merged promptly (watch for type breaks like Stripe apiVersion pins).
-- **Add a real test suite** — currently there are zero automated tests; highest-value first targets: `sanitize.ts`, `gumroad.ts` verification, `reserved-usernames`, link reorder logic, auth flows (Playwright smoke).
+- **Grow the test suite** — Vitest landed with the admin-gate tests; next highest-value targets: `sanitize.ts`, `gumroad.ts` verification, `reserved-usernames`, link reorder logic, auth flows (Playwright smoke).
 - **Stay on plain npm** — `legacy-peer-deps` was removed; keep peer deps honest.
 - **Keep docs truthful** — README, ARCHITECTURE.md, and this file are updated in the same PR as behavior changes.
 
