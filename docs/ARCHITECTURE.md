@@ -77,6 +77,10 @@ Schema at `prisma/schema.prisma` (authoritative). Models:
 | `File` | Uploaded file records (R2) |
 | `AnalyticsEvent` | `VIEW` and `CLICK` events powering the analytics dashboard |
 | `WaitlistSignup` | Pre-launch waitlist entries |
+| `AdminAuditLog` | Every admin action + denied admin-surface probes (actor, action, target, IP/UA metadata) |
+| `Report` | Moderation reports against profiles/links (intake ships in admin Phase 2) |
+
+`User` also carries admin/moderation state (`role` enum USER/MODERATOR/ADMIN, `suspendedAt`, `suspendedReason`, `adminNote`) and first-class Pro state (`proSince`/`proUntil`; `Badge` is display-only).
 
 Prisma 7 with `@prisma/adapter-neon`; the client is **generated into `prisma/generated/`** and imported from there (`src/lib/db.ts`), not from `@prisma/client`. Always run `npx prisma generate` after a fresh install or schema change.
 
@@ -110,6 +114,15 @@ All handlers under `src/app/api/`. Mutating routes check session ownership; abus
 
 **Pricing source of truth** is `src/components/landing/Pricing.tsx` (displayed) and `src/lib/stripe.ts` `PLANS` (constants): **Pro €3.99/mo or €31.99/yr (33% off); Verified badge add-on €4.99 once**. Change both together.
 
+## Admin console
+
+Internal operator surface at `/admin` (plan: local `ADMIN_PLAN.md`; Phase 0 shipped — gate, audit, placeholder overview).
+
+- **Gate**: `requireAdmin()` in `src/lib/admin.ts` — layered: session → `role` claim on the JWT (cheap filter, set at sign-in in `auth.ts`) → **authoritative DB re-check** of role + suspension → env IP allowlist (`ADMIN_IP_ALLOWLIST`, comma-separated exact IPs; unset = disabled). Any failure renders a **404, never a redirect**, so the surface stays undiscoverable. Middleware deliberately ignores `/admin` (its matcher never included it) — the layout and every admin page/handler call `requireAdmin()` themselves.
+- **Audit**: `audit()` writes `AdminAuditLog` rows (actor, action, target, IP + user-agent). Every mutating admin action must call it; authenticated non-admins probing `/admin` are logged as `admin.access_denied` (anonymous probes are not — they'd let anyone fill the table).
+- **First admin**: `npx tsx prisma/promote-admin.ts <email>` — server-side only, no self-serve path.
+- **`ADMIN_REQUIRE_OAUTH=true`** additionally refuses credentials-authenticated admin sessions (borrowing provider 2FA). Off by default: OAuth sign-ins don't persist `User` rows yet, so it can't be enabled until OAuth account persistence lands.
+
 ## Analytics
 
 Public profile views write `AnalyticsEvent(type=VIEW)` on render; link clicks POST to `/api/analytics/click` (`type=CLICK`) before redirecting. The dashboard (`/analytics`) reads `analytics/overview` — stat cards, a 30-day Recharts area chart, top links, and recent activity.
@@ -142,12 +155,12 @@ Sentry captures client, edge, and server errors (`sentry.*.config.ts` at repo ro
 - **CI** (`.github/workflows/ci.yml`): `npm ci` → `prisma generate` → lint → `tsc --noEmit` → `next build`, plus a CodeQL workflow. The build runs without a real database.
 - **Dependencies**: plain npm resolution — `legacy-peer-deps` was dropped when `@sentry/nextjs` 10 added Next 16 peer support. Don't reintroduce it.
 
-## Verification (no test suite yet)
+## Verification
 
-There are no automated tests. Before considering a change done:
+Vitest is set up (`vitest.config.ts`; tests live next to source as `src/**/*.test.ts`) — coverage is thin so far (the admin gate), so manual verification still matters. Before considering a change done:
 
 ```bash
-npm run lint && npx tsc --noEmit && npm run build
+npm run lint && npx tsc --noEmit && npm test && npm run build
 ```
 
-…and for user-facing changes, exercise the affected flow in `npm run dev` (register → onboard → edit → view public profile → click a link → check analytics is the core smoke path). Adding a real test suite is on the roadmap (see GOALS.md).
+…and for user-facing changes, exercise the affected flow in `npm run dev` (register → onboard → edit → view public profile → click a link → check analytics is the core smoke path). CI runs lint → typecheck → test → build.

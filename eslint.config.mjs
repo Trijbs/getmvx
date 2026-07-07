@@ -17,6 +17,10 @@ const eslintConfig = defineConfig([
     // extremely slow and failing on machine-generated code.
     ".open-next/**",
     ".wrangler/**",
+    // Local tooling state (Claude Code worktrees etc.) — never source.
+    ".claude/**",
+    // Generated Prisma client.
+    "prisma/generated/**",
   ]),
 ]);
 
