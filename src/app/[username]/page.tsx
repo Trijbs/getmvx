@@ -12,10 +12,10 @@ export async function generateMetadata({
 
   const profile = await prisma.profile.findUnique({
     where: { username },
-    include: { user: { select: { name: true } } },
+    include: { user: { select: { name: true, suspendedAt: true } } },
   });
 
-  if (!profile || !profile.isPublic) {
+  if (!profile || !profile.isPublic || profile.user.suspendedAt) {
     return { title: "Profile not found — MVX" };
   }
 
@@ -65,12 +65,13 @@ export default async function UserProfilePage({
       },
       theme: true,
       user: {
-        select: { name: true, image: true },
+        select: { name: true, image: true, suspendedAt: true },
       },
     },
   });
 
-  if (!profile || !profile.isPublic) {
+  // Suspended accounts disappear from the public surface entirely.
+  if (!profile || !profile.isPublic || profile.user.suspendedAt) {
     notFound();
   }
 

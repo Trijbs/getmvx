@@ -91,6 +91,19 @@ export async function audit(
 }
 
 /**
+ * Route-handler variant of requireAdmin(): returns null instead of relying
+ * on notFound() (a rendering concept). Any failure — including an outage
+ * mid-check — reads as "no access". Callers return a bare 404 on null.
+ */
+export async function requireAdminApi(): Promise<AdminSession | null> {
+  try {
+    return await requireAdmin();
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Authoritative admin gate for every admin page and /api/admin route.
  * Returns the session on success; renders/throws a 404 on any failure.
  */
