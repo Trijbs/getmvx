@@ -116,9 +116,11 @@ All handlers under `src/app/api/`. Mutating routes check session ownership; abus
 
 ## Admin console
 
-Internal operator surface at `/admin` (plan: local `ADMIN_PLAN.md`; Phase 0 shipped — gate, audit, placeholder overview).
+Internal operator surface at `/admin` (plan: local `ADMIN_PLAN.md`; Phases 0, 1, 3 shipped).
 
-- **Gate**: `requireAdmin()` in `src/lib/admin.ts` — layered: session → `role` claim on the JWT (cheap filter, set at sign-in in `auth.ts`) → **authoritative DB re-check** of role + suspension → env IP allowlist (`ADMIN_IP_ALLOWLIST`, comma-separated exact IPs; unset = disabled). Any failure renders a **404, never a redirect**, so the surface stays undiscoverable. Middleware deliberately ignores `/admin` (its matcher never included it) — the layout and every admin page/handler call `requireAdmin()` themselves.
+Surfaces: `/admin` (metric tiles), `/admin/users` (+`[id]` detail with audited actions: suspend/unsuspend, role change with last-admin guardrail, manual Pro grant/revoke, unpublish, reset username, note, typed-confirmation delete), `/admin/metrics` (30-day trends, top profiles/links), `/admin/waitlist` (+ CSV export at `/api/admin/waitlist/export`). Aggregates live in `src/lib/metrics.ts`. Mutations go through `/api/admin/users/[id]` (+`/grant`), rate-limited per admin account. Suspended users' public profiles 404 (checked in the `[username]` route).
+
+- **Gate**: `requireAdmin()` in `src/lib/admin.ts` — session → **authoritative DB check** of role + suspension (the JWT role claim is advisory/UI-only; tokens snapshot state at sign-in and go stale) → env IP allowlist (`ADMIN_IP_ALLOWLIST`, comma-separated exact IPs; unset = disabled). Any failure renders a **404, never a redirect**, so the surface stays undiscoverable. Route handlers use `requireAdminApi()` (returns null → bare 404, fails closed). Middleware deliberately ignores `/admin` — the layout and every admin page/handler gate themselves.
 - **Audit**: `audit()` writes `AdminAuditLog` rows (actor, action, target, IP + user-agent). Every mutating admin action must call it; authenticated non-admins probing `/admin` are logged as `admin.access_denied` (anonymous probes are not — they'd let anyone fill the table).
 - **First admin**: `npx tsx prisma/promote-admin.ts <email>` — server-side only, no self-serve path.
 - **`ADMIN_REQUIRE_OAUTH=true`** additionally refuses credentials-authenticated admin sessions (borrowing provider 2FA). Off by default: OAuth sign-ins don't persist `User` rows yet, so it can't be enabled until OAuth account persistence lands.

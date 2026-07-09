@@ -34,7 +34,7 @@ The core product is **built and deployed on Vercel**: auth (credentials + Google
 1. **Brand icon & identity system** — replacing placeholder iconography with a coherent brand icon set (`ICON_PLAN.md`, `src/components/brand/`). In progress.
 2. **Legal finalization** — polishing Privacy Policy and Terms of Service drafts (`PRIVACY_POLICY.md`, `TERMS_OF_SERVICE.md`, plan in `LEGAL_PLAN.md`) and wiring the final text into `/privacy` and `/terms`. Required before charging real money.
 3. **Editor expansion** — remaining phases of `EDITOR_EXPANSION_PLAN.md`: widget persistence polish, layout type selector, link groups/sections, unsaved-changes UX, auto-save.
-4. **Admin console** — internal `/admin` surface (plan: `ADMIN_PLAN.md`, local). **Phase 0 shipped** (`Role` enum, `AdminAuditLog`/`Report` models, hardened 404 gate with DB re-check + IP allowlist, first tests). Next: Phase 3 metrics + waitlist export (launch-relevant), then user management, moderation, billing reconcile.
+4. **Admin console** — internal `/admin` surface (plan: `ADMIN_PLAN.md`, local). **Phases 0, 1, 3 shipped**: hardened DB-authority gate + audit log, metrics dashboard + waitlist CSV export, and full user management (search/detail, suspend, roles, Pro grant, username reset, delete — all audited). Remaining: Phase 4 billing reconcile (Gumroad drift report), Phase 2 moderation queue + report intake.
 
 ### Remaining launch checklist
 
