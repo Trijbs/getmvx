@@ -97,24 +97,16 @@ export async function audit(
 export async function requireAdmin(): Promise<AdminSession> {
   const session = await auth();
 
-  // Layer 1+2: session exists and carries the role claim.
-  if (!session?.user?.id || !isAdmin(session)) {
-    // Authenticated non-admins probing /admin are worth a trace; anonymous
-    // 404s are not (that's just crawler noise, and unauthenticated writes
-    // would let anyone fill the audit table).
-    if (session?.user?.id) {
-      await audit(
-        session.user.id,
-        "admin.access_denied",
-        { type: "route", id: "admin" },
-        { reason: "token-missing-admin-claim", tokenRole: session.user.role }
-      );
-    }
+  // Layer 1: an authenticated session. Anonymous probes get a silent 404 —
+  // no audit write, or anyone could fill the table.
+  if (!session?.user?.id) {
     notFound();
   }
 
-  // Layer 3: the token is never trusted for privileges — re-read from the DB
-  // so demotion/suspension takes effect immediately.
+  // Layer 2: the database decides, never the token. Session JWTs live for
+  // weeks and snapshot the role at sign-in, so a token-claim gate goes stale
+  // in both directions (a fresh promotion 404s, a demotion keeps access).
+  // The claim on the session is advisory/UI-only.
   const dbUser = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { role: true, suspendedAt: true },
@@ -124,7 +116,11 @@ export async function requireAdmin(): Promise<AdminSession> {
       session.user.id,
       "admin.access_denied",
       { type: "route", id: "admin" },
-      { reason: "db-check-failed", dbRole: dbUser?.role ?? null }
+      {
+        reason: "db-check-failed",
+        dbRole: dbUser?.role ?? null,
+        tokenRole: session.user.role,
+      }
     );
     notFound();
   }
