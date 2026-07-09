@@ -97,19 +97,35 @@ describe("IP allowlist", () => {
 
 describe("requireAdmin", () => {
   // Parametrized guard for the whole surface: every non-admin state 404s.
+  // The DB is the only authority — token claims never grant or deny.
   const deniedStates: Array<[string, () => void]> = [
     ["logged out", () => mockAuth.mockResolvedValue(null)],
-    ["USER role", () => mockAuth.mockResolvedValue(session("USER"))],
-    ["MODERATOR role", () => mockAuth.mockResolvedValue(session("MODERATOR"))],
     [
-      "ADMIN token but demoted in DB",
+      "USER in DB",
+      () => {
+        mockAuth.mockResolvedValue(session("USER"));
+        mockFindUnique.mockResolvedValue({ role: "USER", suspendedAt: null });
+      },
+    ],
+    [
+      "MODERATOR in DB",
+      () => {
+        mockAuth.mockResolvedValue(session("MODERATOR"));
+        mockFindUnique.mockResolvedValue({
+          role: "MODERATOR",
+          suspendedAt: null,
+        });
+      },
+    ],
+    [
+      "stale ADMIN token but demoted in DB",
       () => {
         mockAuth.mockResolvedValue(session("ADMIN"));
         mockFindUnique.mockResolvedValue({ role: "USER", suspendedAt: null });
       },
     ],
     [
-      "ADMIN token but suspended in DB",
+      "ADMIN in DB but suspended",
       () => {
         mockAuth.mockResolvedValue(session("ADMIN"));
         mockFindUnique.mockResolvedValue({
@@ -119,7 +135,7 @@ describe("requireAdmin", () => {
       },
     ],
     [
-      "ADMIN token but user deleted in DB",
+      "session for a user deleted in DB",
       () => {
         mockAuth.mockResolvedValue(session("ADMIN"));
         mockFindUnique.mockResolvedValue(null);
@@ -141,15 +157,22 @@ describe("requireAdmin", () => {
     expect(result.user.id).toBe("user_1");
   });
 
+  it("admits a freshly promoted admin whose token still says USER", async () => {
+    mockAuth.mockResolvedValue(session("USER"));
+    mockFindUnique.mockResolvedValue({ role: "ADMIN", suspendedAt: null });
+    await expect(requireAdmin()).resolves.toBeTruthy();
+  });
+
   it("audits denied probes from authenticated users but not anonymous ones", async () => {
     mockAuth.mockResolvedValue(session("USER"));
+    mockFindUnique.mockResolvedValue({ role: "USER", suspendedAt: null });
     await expect(requireAdmin()).rejects.toThrow("NEXT_NOT_FOUND");
     expect(mockAuditCreate).toHaveBeenCalledTimes(1);
     expect(mockAuditCreate.mock.calls[0][0].data.action).toBe(
       "admin.access_denied"
     );
     expect(mockAuditCreate.mock.calls[0][0].data.metadata.reason).toBe(
-      "token-missing-admin-claim"
+      "db-check-failed"
     );
 
     mockAuditCreate.mockClear();
