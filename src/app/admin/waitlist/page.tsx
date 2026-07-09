@@ -16,6 +16,7 @@ export default async function AdminWaitlistPage() {
         </h1>
         <a
           href="/api/admin/waitlist/export"
+          download
           className="rounded-md border border-[color:var(--border,rgba(255,255,255,0.15))] px-3 py-1.5 text-sm hover:bg-[color:rgba(255,255,255,0.05)]"
         >
           Export CSV
