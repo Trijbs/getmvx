@@ -80,6 +80,18 @@ export const {
         // "discord"). Used by the ADMIN_REQUIRE_OAUTH gate in lib/admin.ts.
         token.provider = account.provider;
       }
+      // Heal tokens minted before the role claim existed. Sessions are
+      // long-lived JWTs, and the middleware bounces logged-in users away from
+      // /login, so without this a pre-Phase-0 session can never acquire the
+      // claim short of clearing cookies. One DB read, then the claim persists
+      // in the re-issued token.
+      if (!token.role && token.id) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.id as string },
+          select: { role: true },
+        });
+        token.role = dbUser?.role ?? "USER";
+      }
       return token;
     },
     async session({ session, token }) {

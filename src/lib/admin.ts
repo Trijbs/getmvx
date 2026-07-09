@@ -103,10 +103,12 @@ export async function requireAdmin(): Promise<AdminSession> {
     // 404s are not (that's just crawler noise, and unauthenticated writes
     // would let anyone fill the audit table).
     if (session?.user?.id) {
-      await audit(session.user.id, "admin.access_denied", {
-        type: "route",
-        id: "admin",
-      });
+      await audit(
+        session.user.id,
+        "admin.access_denied",
+        { type: "route", id: "admin" },
+        { reason: "token-missing-admin-claim", tokenRole: session.user.role }
+      );
     }
     notFound();
   }
@@ -118,10 +120,12 @@ export async function requireAdmin(): Promise<AdminSession> {
     select: { role: true, suspendedAt: true },
   });
   if (!dbUser || dbUser.role !== "ADMIN" || dbUser.suspendedAt) {
-    await audit(session.user.id, "admin.access_denied", {
-      type: "route",
-      id: "admin",
-    });
+    await audit(
+      session.user.id,
+      "admin.access_denied",
+      { type: "route", id: "admin" },
+      { reason: "db-check-failed", dbRole: dbUser?.role ?? null }
+    );
     notFound();
   }
 
@@ -129,10 +133,12 @@ export async function requireAdmin(): Promise<AdminSession> {
   const allowlist = parseAllowlist(process.env.ADMIN_IP_ALLOWLIST);
   const ip = await requestIp();
   if (!ipAllowed(ip, allowlist)) {
-    await audit(session.user.id, "admin.access_denied", {
-      type: "route",
-      id: "admin",
-    });
+    await audit(
+      session.user.id,
+      "admin.access_denied",
+      { type: "route", id: "admin" },
+      { reason: "ip-not-allowlisted" }
+    );
     notFound();
   }
 
@@ -143,10 +149,12 @@ export async function requireAdmin(): Promise<AdminSession> {
     process.env.ADMIN_REQUIRE_OAUTH === "true" &&
     session.user.provider === "credentials"
   ) {
-    await audit(session.user.id, "admin.access_denied", {
-      type: "route",
-      id: "admin",
-    });
+    await audit(
+      session.user.id,
+      "admin.access_denied",
+      { type: "route", id: "admin" },
+      { reason: "oauth-required" }
+    );
     notFound();
   }
 
