@@ -148,6 +148,9 @@ describe("requireAdmin", () => {
     expect(mockAuditCreate.mock.calls[0][0].data.action).toBe(
       "admin.access_denied"
     );
+    expect(mockAuditCreate.mock.calls[0][0].data.metadata.reason).toBe(
+      "token-missing-admin-claim"
+    );
 
     mockAuditCreate.mockClear();
     mockAuth.mockResolvedValue(null);
