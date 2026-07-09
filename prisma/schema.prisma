@@ -205,6 +205,8 @@ model AnalyticsEvent {
 
   @@index([profileId, createdAt])
   @@index([linkId, createdAt])
+  // Platform-wide daily aggregates in the admin metrics (src/lib/metrics.ts)
+  @@index([type, createdAt])
 }
 
 model WaitlistSignup {
