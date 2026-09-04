@@ -53,9 +53,15 @@ export async function POST(req: Request) {
       );
     }
 
-    // Email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
+    // Email format validation — safe pattern (no nested quantifiers, no ReDoS)
+    const emailParts = email.split("@");
+    const isValidEmail =
+      emailParts.length === 2 &&
+      emailParts[0].length > 0 &&
+      emailParts[1].length > 0 &&
+      emailParts[1].includes(".") &&
+      !email.includes(" ");
+    if (!isValidEmail) {
       return NextResponse.json(
         { error: "Please enter a valid email address" },
         { status: 400 }
