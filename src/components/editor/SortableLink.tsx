@@ -2,6 +2,8 @@
 
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { GripVertical, Pencil, Trash2 } from "lucide-react";
+import { SocialIcon } from "@/components/brand";
 import type { Link } from "../../../prisma/generated/prisma/client";
 
 interface SortableLinkProps {
@@ -42,11 +44,11 @@ export function SortableLink({ link, onDelete, onToggle, onEdit }: SortableLinkP
         className="cursor-grab text-[var(--muted)] active:cursor-grabbing"
         aria-label={`Drag to reorder ${link.title}`}
       >
-        ⠿
+        <GripVertical size={18} />
       </button>
 
       {/* Icon */}
-      {link.icon && <span className="text-lg">{link.icon}</span>}
+      {link.icon && <SocialIcon name={link.icon} size={22} />}
 
       {/* Content */}
       <div className="flex-1 min-w-0">
@@ -75,7 +77,7 @@ export function SortableLink({ link, onDelete, onToggle, onEdit }: SortableLinkP
         className="text-[var(--muted)] transition-colors hover:text-[var(--text)]"
         aria-label="Edit link"
       >
-        ✎
+        <Pencil size={16} />
       </button>
 
       {/* Delete */}
@@ -90,7 +92,7 @@ export function SortableLink({ link, onDelete, onToggle, onEdit }: SortableLinkP
         className="text-[var(--muted)] transition-colors hover:text-[var(--red)]"
         aria-label="Delete link"
       >
-        ✕
+        <Trash2 size={16} />
       </button>
     </div>
   );

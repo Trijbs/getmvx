@@ -1,5 +1,8 @@
 "use client";
 
+import { Check } from "lucide-react";
+import { SocialIcon } from "@/components/brand";
+
 interface Widget {
   id: string;
   type: "twitch" | "spotify" | "discord" | "youtube" | "steam";
@@ -13,34 +16,39 @@ interface WidgetPickerProps {
   onChange: (widgets: Widget[]) => void;
 }
 
-const widgetOptions = [
+const widgetOptions: {
+  type: Widget["type"];
+  icon: string;
+  label: string;
+  desc: string;
+}[] = [
   {
-    type: "twitch" as const,
-    icon: "🎮",
+    type: "twitch",
+    icon: "twitch",
     label: "Twitch",
     desc: "Show live status",
   },
   {
-    type: "spotify" as const,
-    icon: "🎵",
+    type: "spotify",
+    icon: "spotify",
     label: "Spotify",
     desc: "Now playing",
   },
   {
-    type: "discord" as const,
-    icon: "💬",
+    type: "discord",
+    icon: "discord",
     label: "Discord",
     desc: "Member count",
   },
   {
-    type: "youtube" as const,
-    icon: "▶",
+    type: "youtube",
+    icon: "youtube",
     label: "YouTube",
     desc: "Latest video",
   },
   {
-    type: "steam" as const,
-    icon: "🎮",
+    type: "steam",
+    icon: "steam",
     label: "Steam",
     desc: "Currently playing",
   },
@@ -85,13 +93,13 @@ export function WidgetPicker({ widgets, onChange }: WidgetPickerProps) {
                   : "border-[var(--border)] bg-[var(--bg3)] hover:border-[var(--border2)]"
               }`}
             >
-              <span className="text-xl">{opt.icon}</span>
+              <SocialIcon name={opt.icon} size={24} />
               <div>
                 <p className="text-sm font-500">{opt.label}</p>
                 <p className="text-xs text-[var(--muted)]">{opt.desc}</p>
               </div>
               {isEnabled && (
-                <span className="ml-auto text-[var(--accent)]">✓</span>
+                <Check size={16} className="ml-auto text-[var(--accent)]" aria-hidden="true" />
               )}
             </button>
           );

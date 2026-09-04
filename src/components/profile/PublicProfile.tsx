@@ -1,6 +1,7 @@
 "use client";
 
 import NextLink from "next/link";
+import { SocialIcon } from "@/components/brand";
 import type { Profile, Link, Theme } from "../../../prisma/generated/prisma/client";
 
 type ProfileWithRelations = Profile & {
@@ -105,7 +106,7 @@ export function PublicProfile({ profile }: PublicProfileProps) {
         className="flex items-center justify-center gap-2 rounded-xl px-5 py-3.5 text-sm font-500 transition-all hover:brightness-110"
         style={isMinimal ? minimalStyle : filledStyle}
       >
-        {link.icon && <span>{link.icon}</span>}
+        {link.icon && <SocialIcon name={link.icon} size={20} />}
         {link.title}
       </a>
     );

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Check, X } from "lucide-react";
 import { PRICING } from "@/lib/pricing";
 
 export function Pricing() {
@@ -53,11 +54,11 @@ export function Pricing() {
                 }`}
               >
                 <span
-                  className={`mt-0.5 shrink-0 font-700 ${
+                  className={`mt-0.5 shrink-0 ${
                     item.included ? "text-[var(--green)]" : "text-[var(--muted)]"
                   }`}
                 >
-                  {item.included ? "✓" : "✕"}
+                  {item.included ? <Check size={16} aria-hidden="true" /> : <X size={16} aria-hidden="true" />}
                 </span>
                 {item.text}
               </li>
@@ -109,8 +110,8 @@ export function Pricing() {
                 key={item}
                 className="flex items-start gap-2.5 text-sm"
               >
-                <span className="mt-0.5 shrink-0 font-700 text-[var(--green)]">
-                  ✓
+                <span className="mt-0.5 shrink-0 text-[var(--green)]">
+                  <Check size={16} aria-hidden="true" />
                 </span>
                 {item}
               </li>

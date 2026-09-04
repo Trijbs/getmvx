@@ -1,24 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-
-const socialIcons: Record<string, string> = {
-  "🔗": "Link",
-  "𝕏": "Twitter/X",
-  "▶": "YouTube",
-  "📸": "Instagram",
-  "💬": "Discord",
-  "🎵": "TikTok",
-  "🎮": "Twitch",
-  "🎧": "Spotify",
-  "🐙": "GitHub",
-  "💼": "LinkedIn",
-  "🌐": "Website",
-  "📧": "Email",
-  "📝": "Blog",
-  "🛒": "Shop",
-  "💡": "Portfolio",
-};
+import { SOCIAL_ICONS, SocialIcon } from "@/components/brand";
 
 type LinkData = { title: string; url: string; icon?: string; groupId?: string };
 
@@ -42,7 +25,7 @@ export function AddLinkModal({
   const isEditing = Boolean(initialData);
   const [title, setTitle] = useState(initialData?.title ?? "");
   const [url, setUrl] = useState(initialData?.url ?? "");
-  const [icon, setIcon] = useState(initialData?.icon ?? "🔗");
+  const [icon, setIcon] = useState(initialData?.icon ?? "link");
   const [groupId, setGroupId] = useState(initialData?.groupId ?? "");
   const [showIcons, setShowIcons] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; url?: string }>({});
@@ -129,32 +112,38 @@ export function AddLinkModal({
               type="button"
               onClick={() => setShowIcons(!showIcons)}
               className="flex items-center gap-2 rounded-lg border border-[var(--border2)] bg-[var(--bg3)] px-4 py-2.5 text-sm"
+              aria-expanded={showIcons}
             >
-              <span className="text-lg">{icon}</span>
+              <SocialIcon name={icon} size={22} />
               <span className="text-[var(--muted)]">
-                {socialIcons[icon] || "Choose"}
+                {SOCIAL_ICONS[icon]?.label || "Choose"}
               </span>
             </button>
             {showIcons && (
-              <div className="mt-2 grid grid-cols-5 gap-2 rounded-lg border border-[var(--border2)] bg-[var(--bg3)] p-3">
-                {Object.entries(socialIcons).map(([emoji, name]) => (
-                  <button
-                    key={emoji}
-                    type="button"
-                    onClick={() => {
-                      setIcon(emoji);
-                      setShowIcons(false);
-                    }}
-                    className={`flex flex-col items-center gap-1 rounded-lg p-2 text-xs transition-all ${
-                      icon === emoji
-                        ? "bg-[var(--accent-dim)] text-[var(--accent)]"
-                        : "text-[var(--muted)] hover:bg-[var(--bg4)]"
-                    }`}
-                  >
-                    <span className="text-lg">{emoji}</span>
-                    <span className="truncate w-full text-center">{name}</span>
-                  </button>
-                ))}
+              <div className="mt-2 grid grid-cols-4 gap-2 sm:grid-cols-5 rounded-lg border border-[var(--border2)] bg-[var(--bg3)] p-3">
+                {Object.entries(SOCIAL_ICONS).map(([key, def]) => {
+                  if (key === "twitter") return null; // alias, avoid duplicate
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => {
+                        setIcon(key);
+                        setShowIcons(false);
+                      }}
+                      className={`flex flex-col items-center gap-1 rounded-lg p-2 text-xs transition-all ${
+                        icon === key
+                          ? "bg-[var(--accent-dim)] text-[var(--accent)]"
+                          : "text-[var(--muted)] hover:bg-[var(--bg4)]"
+                      }`}
+                    >
+                      <SocialIcon name={key} size={22} />
+                      <span className="truncate w-full text-center">
+                        {def.label}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             )}
           </div>

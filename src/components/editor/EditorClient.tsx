@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect, useRef } from "react";
+import { X as XIcon } from "lucide-react";
 import {
   DndContext,
   closestCenter,
@@ -609,7 +610,7 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
             className="rounded-lg p-1 text-[var(--muted)] hover:text-[var(--text)] lg:hidden"
             aria-label="Close preview"
           >
-            ✕
+            <XIcon size={18} aria-hidden="true" />
           </button>
         </div>
         <ProfilePreviewCard
