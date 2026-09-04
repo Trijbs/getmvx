@@ -3,6 +3,7 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { MAX_BIO_LENGTH, APP_DOMAIN } from "@/lib/constants";
 
 export default function OnboardingPage() {
   const { data: session, status } = useSession();
@@ -87,7 +88,7 @@ export default function OnboardingPage() {
             </label>
             <div className="flex items-center overflow-hidden rounded-[10px] border border-[var(--border2)] bg-[var(--bg3)] transition-[border-color] focus-within:border-[var(--accent)]">
               <span className="border-r border-[var(--border)] px-4 py-3 text-sm text-[var(--muted)]">
-                getmvx.cc/
+                {APP_DOMAIN}/
               </span>
               <input
                 type="text"
@@ -112,13 +113,13 @@ export default function OnboardingPage() {
             <textarea
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              maxLength={160}
+              maxLength={MAX_BIO_LENGTH}
               rows={3}
               className="w-full resize-none rounded-[10px] border border-[var(--border2)] bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
               placeholder="Tell the world about yourself..."
             />
             <p className="mt-1.5 text-xs text-[var(--muted)]">
-              {bio.length}/160 characters
+              {bio.length}/{MAX_BIO_LENGTH} characters
             </p>
           </div>
 

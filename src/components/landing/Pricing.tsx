@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { PRICING } from "@/lib/pricing";
 
 export function Pricing() {
   return (
@@ -79,10 +80,11 @@ export function Pricing() {
             PRO
           </div>
           <div className="mb-1 font-[family-name:var(--font-barlow)] text-[56px] font-800 leading-none">
-            €<span>3.99</span>
+            €<span>{PRICING.pro.monthly.amount}</span>
           </div>
           <div className="mb-6 text-[13px] text-[var(--muted)]">
-            per month · or €31.99/yr (save 33%)
+            {PRICING.pro.monthly.label} · or {PRICING.pro.yearly.label} (save{" "}
+            {PRICING.pro.yearly.savings})
           </div>
           <div className="mb-8 text-sm leading-relaxed text-[var(--muted)]">
             Full control over every pixel. The platform for creators who take
@@ -101,7 +103,7 @@ export function Pricing() {
               "Font picker (900+ fonts)",
               "Pro badge on your profile",
               "Priority support",
-              "Verified badge (optional add-on, €4.99 once)",
+              `Verified badge (optional add-on, ${PRICING.verified.oneTime.label})`,
             ].map((item) => (
               <li
                 key={item}
@@ -118,7 +120,7 @@ export function Pricing() {
         href="/register"
         className="block w-full rounded-[10px] bg-[var(--accent)] py-3.5 text-center text-[15px] font-600 text-[var(--bg)] transition-all hover:bg-[var(--accent2)]"
       >
-        Get Pro for €3.99/mo
+        Get Pro for {PRICING.pro.monthly.label}
       </Link>
         </div>
       </div>

@@ -2,8 +2,15 @@ import { NextResponse } from "next/server";
 import { requireAdmin, audit } from "@/lib/admin";
 import { getWaitlist } from "@/lib/metrics";
 
-function csvField(value: string): string {
-  return /[",\n]/.test(value) ? `"${value.replace(/"/g, '""')}"` : value;
+function csvField(value: string | null | undefined): string {
+  if (value == null) return "";
+  const str = String(value);
+  // Neutralize formula-triggering characters to prevent CSV injection
+  const sanitized = str.replace(/^([=+\-@\t\r])/, "'$1");
+  if (/[",\n\r]/.test(sanitized)) {
+    return `"${sanitized.replace(/"/g, '""')}"`;
+  }
+  return sanitized;
 }
 
 export async function GET() {

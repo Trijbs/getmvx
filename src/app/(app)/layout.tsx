@@ -26,7 +26,7 @@ export default async function DashboardLayout({
     <div className="min-h-screen bg-[var(--bg)]">
       <DashboardNav />
       <MobileNav />
-      <main className="pl-[220px] max-lg:pl-0 max-lg:pb-16">
+      <main id="main-content" className="pl-[220px] max-lg:pl-0 max-lg:pb-16">
         <div className="mx-auto max-w-[1000px] px-6 py-8 max-lg:px-4">
           {children}
         </div>

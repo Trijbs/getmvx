@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const socialIcons: Record<string, string> = {
   "🔗": "Link",
@@ -45,10 +45,66 @@ export function AddLinkModal({
   const [icon, setIcon] = useState(initialData?.icon ?? "🔗");
   const [groupId, setGroupId] = useState(initialData?.groupId ?? "");
   const [showIcons, setShowIcons] = useState(false);
+  const [errors, setErrors] = useState<{ title?: string; url?: string }>({});
+  const titleInputRef = useRef<HTMLInputElement>(null);
+
+  // Focus the title input on open and handle Escape-to-close
+  useEffect(() => {
+    titleInputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [onClose]);
+
+  // Focus trap: keep Tab cycling within the dialog
+  useEffect(() => {
+    const dialog = document.getElementById("add-link-dialog");
+    if (!dialog) return;
+    const focusable =
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const els = Array.from(
+        dialog.querySelectorAll<HTMLElement>(focusable)
+      ).filter((el) => !el.hasAttribute("disabled"));
+      if (els.length === 0) return;
+      const first = els[0];
+      const last = els[els.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", handleTab);
+    return () => document.removeEventListener("keydown", handleTab);
+  }, []);
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!title || !url) return;
+    const newErrors: { title?: string; url?: string } = {};
+    if (!title.trim()) newErrors.title = "Title is required";
+    if (!url.trim()) newErrors.url = "URL is required";
+    else {
+      try {
+        const parsed = new URL(url);
+        if (!["http:", "https:"].includes(parsed.protocol)) {
+          newErrors.url = "Must be a valid http/https URL";
+        }
+      } catch {
+        newErrors.url = "Must be a valid URL";
+      }
+    }
+    setErrors(newErrors);
+    if (Object.keys(newErrors).length > 0) return;
+
     const data: LinkData = { title, url, icon, groupId: groupId || undefined };
 
     if (isEditing && initialData && onEdit) {
@@ -59,9 +115,9 @@ export function AddLinkModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+    <div id="add-link-dialog" className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm" role="dialog" aria-modal="true" aria-labelledby="add-link-title">
       <div className="w-full max-w-[420px] rounded-[16px] border border-[var(--border2)] bg-[var(--bg2)] p-6">
-        <h2 className="mb-4 font-[family-name:var(--font-barlow)] text-lg font-700">
+        <h2 id="add-link-title" className="mb-4 font-[family-name:var(--font-barlow)] text-lg font-700">
           {isEditing ? "Edit link" : "Add link"}
         </h2>
 
@@ -107,26 +163,33 @@ export function AddLinkModal({
           <div className="mb-4">
             <label className="mb-1.5 block text-sm font-500">Title</label>
             <input
+              ref={titleInputRef}
               type="text"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-              className="w-full rounded-lg border border-[var(--border2)] bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+              onChange={(e) => { setTitle(e.target.value); if (errors.title) setErrors((p) => ({ ...p, title: undefined })); }}
+              aria-invalid={!!errors.title}
+              className={`w-full rounded-lg border bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)] ${errors.title ? "border-red-500/60" : "border-[var(--border2)]"}`}
               placeholder="My Portfolio"
             />
+            {errors.title && (
+              <p className="mt-1 text-xs text-red-400" role="alert">{errors.title}</p>
+            )}
           </div>
 
           {/* URL */}
           <div className="mb-4">
             <label className="mb-1.5 block text-sm font-500">URL</label>
             <input
-              type="url"
+              type="text"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              required
-              className="w-full rounded-lg border border-[var(--border2)] bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+              onChange={(e) => { setUrl(e.target.value); if (errors.url) setErrors((p) => ({ ...p, url: undefined })); }}
+              aria-invalid={!!errors.url}
+              className={`w-full rounded-lg border bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)] ${errors.url ? "border-red-500/60" : "border-[var(--border2)]"}`}
               placeholder="https://example.com"
             />
+            {errors.url && (
+              <p className="mt-1 text-xs text-red-400" role="alert">{errors.url}</p>
+            )}
           </div>
 
           {/* Section */}

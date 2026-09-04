@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/ratelimit";
 
 export async function PATCH(
   req: Request,
@@ -10,6 +11,11 @@ export async function PATCH(
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = await rateLimit(`themes:${session.user.id}`, 20, 60);
+    if (!rl.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
     const { id } = await params;
@@ -27,6 +33,10 @@ export async function PATCH(
 
     if (!body.config || typeof body.config !== "object") {
       return NextResponse.json({ error: "config is required" }, { status: 400 });
+    }
+
+    if (JSON.stringify(body.config).length > 10_000) {
+      return NextResponse.json({ error: "Theme config is too large" }, { status: 400 });
     }
 
     // Merge partial config update into the existing config

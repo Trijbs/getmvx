@@ -23,6 +23,8 @@ import { FontPicker } from "@/components/editor/FontPicker";
 import { CssEditor } from "@/components/editor/CssEditor";
 import { WidgetPicker } from "@/components/editor/WidgetPicker";
 import { ProfilePreviewCard } from "@/components/editor/ProfilePreviewCard";
+import { useToast } from "@/components/ui/Toast";
+import { MAX_BIO_LENGTH } from "@/lib/constants";
 import type { Profile, Link, Theme } from "../../../prisma/generated/prisma/client";
 
 type ProfileWithRelations = Profile & {
@@ -67,6 +69,8 @@ function Section({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-controls={`section-${title.replace(/\s+/g, "-").toLowerCase()}`}
         className="flex w-full items-center justify-between text-sm font-600"
       >
         <span>{title}</span>
@@ -77,7 +81,14 @@ function Section({
           ▾
         </span>
       </button>
-      {open && <div className="mt-4">{children}</div>}
+      {open && (
+        <div
+          id={`section-${title.replace(/\s+/g, "-").toLowerCase()}`}
+          className="mt-4"
+        >
+          {children}
+        </div>
+      )}
     </section>
   );
 }
@@ -107,8 +118,9 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
   // ── Dirty / auto-save state ─────────────────────────────────────────
   const [isDirty, setIsDirty] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
+  const [showPreview, setShowPreview] = useState(false);
   const bioTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const { addToast } = useToast();
 
   // ── Load widgets on mount ────────────────────────────────────────────
   useEffect(() => {
@@ -116,6 +128,34 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
       .then((r) => r.json())
       .then((data: Widget[]) => setWidgets(data))
       .catch(() => {});
+  }, []);
+
+  // ── Warn before leaving with unsaved changes ─────────────────────────
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (isDirty) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [isDirty]);
+
+  // ── Ctrl/Cmd+S to save ───────────────────────────────────────────────
+  const handleSaveRef = useRef(handleSave);
+  useEffect(() => {
+    handleSaveRef.current = handleSave;
+  });
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s") {
+        e.preventDefault();
+        handleSaveRef.current();
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
   // ── DnD sensors ─────────────────────────────────────────────────────
@@ -180,9 +220,9 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
       const newLink = (await res.json()) as Link;
       setLinks((prev) => [...prev, newLink]);
       setShowAddLink(false);
-      flash("Link added!");
+      addToast("Link added!", "success");
     } catch {
-      flash("Failed to add link");
+      addToast("Failed to add link", "error");
     }
   }
 
@@ -191,9 +231,9 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
       const res = await fetch(`/api/links/${id}`, { method: "DELETE" });
       if (!res.ok) throw new Error();
       setLinks((prev) => prev.filter((l) => l.id !== id));
-      flash("Link deleted");
+      addToast("Link deleted", "success");
     } catch {
-      flash("Failed to delete link");
+      addToast("Failed to delete link", "error");
     }
   }
 
@@ -210,7 +250,7 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
     } catch {
       // Revert on failure
       setLinks((prev) => prev.map((l) => (l.id === id ? { ...l, isActive: !isActive } : l)));
-      flash("Failed to update link");
+      addToast("Failed to update link", "error");
     }
   }
 
@@ -233,9 +273,9 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
       const updated = (await res.json()) as Link;
       setLinks((prev) => prev.map((l) => (l.id === id ? updated : l)));
       setEditingLink(null);
-      flash("Link updated!");
+      addToast("Link updated!", "success");
     } catch {
-      flash("Failed to update link");
+      addToast("Failed to update link", "error");
     }
   }
 
@@ -315,9 +355,9 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
       });
 
       setAvatarUrl(finalUrl);
-      flash("Avatar updated!");
+      addToast("Avatar updated!", "success");
     } catch {
-      flash("Avatar upload failed");
+      addToast("Avatar upload failed", "error");
     } finally {
       setAvatarUploading(false);
     }
@@ -325,7 +365,6 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
 
   async function handleSave() {
     setSaving(true);
-    setMessage("");
     try {
       await fetch("/api/profile", {
         method: "PATCH",
@@ -347,17 +386,12 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
         }),
       });
       setIsDirty(false);
-      flash("Saved!");
+      addToast("Saved!", "success");
     } catch {
-      flash("Failed to save");
+      addToast("Failed to save", "error");
     } finally {
       setSaving(false);
     }
-  }
-
-  function flash(msg: string) {
-    setMessage(msg);
-    setTimeout(() => setMessage(""), 2500);
   }
 
   // ── Group links by section ────────────────────────────────────────────
@@ -386,9 +420,9 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
             {isDirty && !saving && (
               <span className="text-xs text-[var(--muted)]">Unsaved changes</span>
             )}
-            {message && (
-              <span className="text-sm text-[var(--green)]">{message}</span>
-            )}
+            <span className="hidden text-xs text-[var(--muted)] sm:inline">
+              ⌘S
+            </span>
             <button
               onClick={handleSave}
               disabled={saving || !isDirty}
@@ -442,13 +476,13 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
           <textarea
             value={bio}
             onChange={(e) => handleBioChange(e.target.value)}
-            maxLength={160}
+            maxLength={MAX_BIO_LENGTH}
             rows={3}
             className="w-full resize-none rounded-lg border border-[var(--border2)] bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
             placeholder="Tell the world about yourself…"
           />
           <p className="mt-1.5 text-right text-xs text-[var(--muted)]">
-            {bio.length}/160
+            {bio.length}/{MAX_BIO_LENGTH}
           </p>
         </Section>
 
@@ -563,8 +597,21 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
       </div>
 
       {/* ── Right — Live preview ── */}
-      <div className="sticky top-8 self-start hidden lg:block">
-        <p className="mb-3 text-xs font-500 text-[var(--muted)]">Live preview</p>
+      <div
+        className={`fixed inset-0 z-30 bg-[var(--bg)] p-4 lg:static lg:inset-auto lg:block lg:sticky lg:top-8 lg:self-start lg:p-0 ${
+          showPreview ? "block" : "hidden"
+        }`}
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <p className="text-xs font-500 text-[var(--muted)]">Live preview</p>
+          <button
+            onClick={() => setShowPreview(false)}
+            className="rounded-lg p-1 text-[var(--muted)] hover:text-[var(--text)] lg:hidden"
+            aria-label="Close preview"
+          >
+            ✕
+          </button>
+        </div>
         <ProfilePreviewCard
           username={profile.username}
           bio={bio}
@@ -574,6 +621,15 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
           fontFamily={selectedFont}
         />
       </div>
+
+      {/* ── Mobile preview toggle ── */}
+      <button
+        onClick={() => setShowPreview((v) => !v)}
+        className="fixed bottom-20 right-4 z-40 rounded-full bg-[var(--accent)] p-3 text-white shadow-lg lg:hidden"
+        aria-label={showPreview ? "Hide preview" : "Show preview"}
+      >
+        👁
+      </button>
 
       {/* ── Modals ── */}
       {showAddLink && (

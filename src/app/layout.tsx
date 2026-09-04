@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Barlow_Condensed, Inter, DM_Mono } from "next/font/google";
+import { ToastProvider } from "@/components/ui/Toast";
 import "./globals.css";
 
 const barlow = Barlow_Condensed({
@@ -73,7 +74,15 @@ export default function RootLayout({
       lang="en"
       className={`${barlow.variable} ${inter.variable} ${dmMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[200] focus:rounded-xl focus:bg-[var(--accent)] focus:px-4 focus:py-2 focus:text-sm focus:text-white"
+        >
+          Skip to content
+        </a>
+        <ToastProvider>{children}</ToastProvider>
+      </body>
     </html>
   );
 }

@@ -48,7 +48,7 @@ export async function rateLimit(
     const count = Number(data?.[0]?.result ?? 0);
 
     return {
-      success: count <= limit,
+      success: count < limit,
       remaining: Math.max(0, limit - count),
     };
   } catch {

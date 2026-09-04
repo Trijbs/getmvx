@@ -1,15 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import dynamic from "next/dynamic";
+
+const AnalyticsChart = dynamic(
+  () =>
+    import("@/components/analytics/AnalyticsChart").then(
+      (m) => m.AnalyticsChart
+    ),
+  {
+    loading: () => (
+      <div className="flex h-[300px] animate-pulse items-center justify-center rounded-xl bg-[var(--surface)]">
+        <span className="text-sm text-[var(--muted)]">Loading chart...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
 
 interface AnalyticsData {
   totals: {
@@ -106,83 +113,7 @@ export function AnalyticsDashboard() {
       {/* Chart */}
       <section className="mb-8 rounded-[14px] border border-[var(--border)] bg-[var(--bg2)] p-5">
         <h2 className="mb-4 text-sm font-600">Last 30 days</h2>
-        <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData}>
-              <defs>
-                <linearGradient id="viewsGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--accent)"
-                    stopOpacity={0.3}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--accent)"
-                    stopOpacity={0}
-                  />
-                </linearGradient>
-                <linearGradient id="clicksGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop
-                    offset="5%"
-                    stopColor="var(--green)"
-                    stopOpacity={0.3}
-                  />
-                  <stop
-                    offset="95%"
-                    stopColor="var(--green)"
-                    stopOpacity={0}
-                  />
-                </linearGradient>
-              </defs>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="var(--border)"
-                vertical={false}
-              />
-              <XAxis
-                dataKey="date"
-                stroke="var(--muted)"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(v) => {
-                  const d = new Date(v);
-                  return `${d.getMonth() + 1}/${d.getDate()}`;
-                }}
-              />
-              <YAxis
-                stroke="var(--muted)"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-              />
-              <Tooltip
-                contentStyle={{
-                  background: "var(--bg3)",
-                  border: "1px solid var(--border2)",
-                  borderRadius: "8px",
-                  fontSize: "12px",
-                }}
-                labelStyle={{ color: "var(--text)" }}
-              />
-              <Area
-                type="monotone"
-                dataKey="views"
-                stroke="var(--accent)"
-                fill="url(#viewsGrad)"
-                strokeWidth={2}
-              />
-              <Area
-                type="monotone"
-                dataKey="clicks"
-                stroke="var(--green)"
-                fill="url(#clicksGrad)"
-                strokeWidth={2}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
-        </div>
+        <AnalyticsChart data={chartData} />
         <div className="mt-3 flex justify-center gap-6">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-[var(--accent)]" />

@@ -1,7 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { rateLimit, clientIp } from "@/lib/ratelimit";
 
 export async function GET(req: Request) {
+  const ip = clientIp(req);
+  const rl = await rateLimit(`verify-email:${ip}`, 10, 60);
+  if (!rl.success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   const { searchParams } = new URL(req.url);
   const token = searchParams.get("token");
   const email = searchParams.get("email");
