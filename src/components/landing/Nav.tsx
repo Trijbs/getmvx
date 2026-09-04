@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { EggLogo } from "@/components/brand/EggLogo";
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
+import { useScrollFrame } from "@/hooks/useScroll";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -13,12 +15,32 @@ const NAV_LINKS = [
 
 export function Nav() {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const reducedMotion = usePrefersReducedMotion();
+
+  useScrollFrame((state) => {
+    if (reducedMotion) return;
+    const nextScrolled = state.y > 24;
+    const nextHidden = state.y > 140 && state.direction === 1 && !mobileOpen;
+    setScrolled((current) => (current === nextScrolled ? current : nextScrolled));
+    setHidden((current) => (current === nextHidden ? current : nextHidden));
+  });
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--bg)]/85 px-[5%] backdrop-blur-xl" aria-label="Main navigation">
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b px-[5%] backdrop-blur-xl transition-all duration-300 ${
+        hidden ? "-translate-y-full" : "translate-y-0"
+      } ${
+        scrolled
+          ? "border-[var(--border)] bg-[var(--bg)]/95"
+          : "border-transparent bg-[var(--bg)]/60"
+      }`}
+      aria-label="Main navigation"
+    >
       <Link href="/" className="flex items-center gap-3" aria-label="MVX Home">
         <EggLogo size={32} />
-        <span className="font-[family-name:var(--font-display)] text-[18px] font-700 tracking-[0.08em] uppercase text-[var(--text)]">
+        <span className="font-display text-[18px] font-[700] tracking-[0.08em] uppercase text-[var(--text)]">
           GETMV<span className="text-[var(--accent)]">X</span>
         </span>
       </Link>
@@ -28,7 +50,7 @@ export function Nav() {
           <li key={link.href}>
             <a
               href={link.href}
-              className="text-sm font-500 text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+              className="text-sm font-[500] text-[var(--muted)] transition-colors hover:text-[var(--text)]"
             >
               {link.label}
             </a>
@@ -39,13 +61,13 @@ export function Nav() {
       <div className="flex items-center gap-2.5">
         <Link
           href="/login"
-          className="hidden rounded-lg border border-[var(--border2)] bg-transparent px-[18px] py-2 text-sm font-500 text-[var(--muted)] transition-all hover:border-white/25 hover:text-[var(--text)] sm:inline-block"
+          className="hidden rounded-lg border border-[var(--border2)] bg-transparent px-[18px] py-2 text-sm font-[500] text-[var(--muted)] transition-all hover:border-white/25 hover:text-[var(--text)] sm:inline-block"
         >
           Sign in
         </Link>
         <Link
           href="/register"
-          className="rounded-lg bg-[var(--accent)] px-5 py-2 text-sm font-600 text-[var(--bg)] transition-all hover:bg-[var(--accent2)]"
+          className="rounded-lg bg-[var(--accent)] px-5 py-2 text-sm font-[600] text-[var(--bg)] transition-all hover:bg-[var(--accent2)]"
         >
           Get started free
         </Link>
@@ -76,7 +98,7 @@ export function Nav() {
                 <a
                   href={link.href}
                   onClick={() => setMobileOpen(false)}
-                  className="block px-2 py-2.5 text-sm font-500 text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+                  className="block px-2 py-2.5 text-sm font-[500] text-[var(--muted)] transition-colors hover:text-[var(--text)]"
                 >
                   {link.label}
                 </a>
@@ -86,7 +108,7 @@ export function Nav() {
               <Link
                 href="/login"
                 onClick={() => setMobileOpen(false)}
-                className="block px-2 py-2.5 text-sm font-500 text-[var(--muted)] transition-colors hover:text-[var(--text)]"
+                className="block px-2 py-2.5 text-sm font-[500] text-[var(--muted)] transition-colors hover:text-[var(--text)]"
               >
                 Sign in
               </Link>
