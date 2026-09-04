@@ -43,6 +43,8 @@ export async function PATCH(
       position?: number;
       isActive?: boolean;
       groupId?: string | null;
+      label?: string | null;
+      labelColor?: string | null;
     } = {};
     if (typeof body.title === "string") data.title = body.title;
     if (typeof body.url === "string") {
@@ -60,6 +62,10 @@ export async function PATCH(
     if (typeof body.isActive === "boolean") data.isActive = body.isActive;
     if (typeof body.groupId === "string" || body.groupId === null)
       data.groupId = body.groupId as string | null;
+    if (typeof body.label === "string" || body.label === null)
+      data.label = body.label?.trim() ? (body.label as string).trim() : null;
+    if (typeof body.labelColor === "string" || body.labelColor === null)
+      data.labelColor = body.labelColor as string | null;
 
     const updated = await prisma.link.update({
       where: { id },

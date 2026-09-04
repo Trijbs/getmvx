@@ -3,7 +3,22 @@
 import { useEffect, useRef, useState } from "react";
 import { SOCIAL_ICONS, SocialIcon } from "@/components/brand";
 
-type LinkData = { title: string; url: string; icon?: string; groupId?: string };
+type LinkData = {
+  title: string;
+  url: string;
+  icon?: string;
+  groupId?: string;
+  label?: string;
+  labelColor?: string;
+};
+
+const LABEL_CHOICES: Record<string, string> = {
+  green: "#2ecc71",
+  red: "#e74c3c",
+  amber: "#f1c40f",
+  blue: "#3498db",
+  violet: "#9b59b6",
+};
 
 interface AddLinkModalProps {
   /** Present when editing an existing link */
@@ -27,6 +42,8 @@ export function AddLinkModal({
   const [url, setUrl] = useState(initialData?.url ?? "");
   const [icon, setIcon] = useState(initialData?.icon ?? "link");
   const [groupId, setGroupId] = useState(initialData?.groupId ?? "");
+  const [label, setLabel] = useState(initialData?.label ?? "");
+  const [labelColor, setLabelColor] = useState(initialData?.labelColor ?? "green");
   const [showIcons, setShowIcons] = useState(false);
   const [errors, setErrors] = useState<{ title?: string; url?: string }>({});
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -88,7 +105,14 @@ export function AddLinkModal({
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return;
 
-    const data: LinkData = { title, url, icon, groupId: groupId || undefined };
+    const data: LinkData = {
+      title,
+      url,
+      icon,
+      groupId: groupId || undefined,
+      label: label.trim() || undefined,
+      labelColor: label.trim() ? labelColor : undefined,
+    };
 
     if (isEditing && initialData && onEdit) {
       onEdit(initialData.id, data);
@@ -200,6 +224,42 @@ export function AddLinkModal({
                   <option key={s} value={s} />
                 ))}
               </datalist>
+            )}
+          </div>
+
+          {/* Label / status pill */}
+          <div className="mb-6">
+            <label className="mb-1.5 block text-sm font-500">
+              Label <span className="text-[var(--muted)] font-400">(optional)</span>
+            </label>
+            <input
+              type="text"
+              value={label}
+              onChange={(e) => setLabel(e.target.value)}
+              maxLength={24}
+              className="w-full rounded-lg border border-[var(--border2)] bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
+              placeholder="e.g. New, Sale, DM…"
+            />
+            {label.trim() && (
+              <div className="mt-2 flex items-center gap-2">
+                <span className="text-xs text-[var(--muted)]">Color:</span>
+                <div className="flex gap-1.5">
+                  {Object.entries(LABEL_CHOICES).map(([key, hex]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      aria-label={`Label color ${key}`}
+                      onClick={() => setLabelColor(key)}
+                      className={`h-6 w-6 rounded-full border-2 transition-all ${
+                        labelColor === key
+                          ? "border-[var(--accent)] scale-110"
+                          : "border-transparent hover:scale-110"
+                      }`}
+                      style={{ background: hex }}
+                    />
+                  ))}
+                </div>
+              </div>
             )}
           </div>
 

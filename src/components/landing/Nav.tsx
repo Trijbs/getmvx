@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
-import { LogoMark } from "@/components/brand";
+import { EggLogo } from "@/components/brand/EggLogo";
 
 const NAV_LINKS = [
   { label: "Features", href: "#features" },
@@ -17,7 +17,7 @@ export function Nav() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 flex h-16 items-center justify-between border-b border-[var(--border)] bg-[var(--bg)]/85 px-[5%] backdrop-blur-xl" aria-label="Main navigation">
       <Link href="/" className="flex items-center gap-3" aria-label="MVX Home">
-        <LogoMark size={32} />
+        <EggLogo size={32} />
         <span className="font-[family-name:var(--font-display)] text-[18px] font-700 tracking-[0.08em] uppercase text-[var(--text)]">
           GETMV<span className="text-[var(--accent)]">X</span>
         </span>

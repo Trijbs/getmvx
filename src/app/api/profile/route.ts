@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { sanitizeCustomCss } from "@/lib/sanitize";
 import { rateLimit } from "@/lib/ratelimit";
+import { isProTier } from "@/lib/features";
 
 export async function PATCH(req: Request) {
   try {
@@ -23,8 +24,10 @@ export async function PATCH(req: Request) {
       layoutType?: string;
       isPublic?: boolean;
       avatarUrl?: string;
+      colorMode?: string;
+      podiumMode?: string;
     };
-    const { bio, themeId, customCss, layoutType, isPublic, avatarUrl } = body;
+    const { bio, themeId, customCss, layoutType, isPublic, avatarUrl, colorMode, podiumMode } = body;
 
     // Input validation
     if (bio != null && typeof bio !== "string") {
@@ -48,6 +51,22 @@ export async function PATCH(req: Request) {
     const VALID_LAYOUTS = ["centered", "left-aligned", "grid"];
     if (layoutType != null && !VALID_LAYOUTS.includes(layoutType as string)) {
       return NextResponse.json({ error: "Invalid layout type" }, { status: 400 });
+    }
+    const VALID_COLOR_MODES = ["dark", "light"];
+    if (colorMode != null && !VALID_COLOR_MODES.includes(colorMode as string)) {
+      return NextResponse.json({ error: "Invalid color mode" }, { status: 400 });
+    }
+    const VALID_PODIUM_MODES = ["stack", "tabs"];
+    if (podiumMode != null && !VALID_PODIUM_MODES.includes(podiumMode as string)) {
+      return NextResponse.json({ error: "Invalid podium mode" }, { status: 400 });
+    }
+
+    // PRO-gate the dark/lite and Profilepodiums features server-side.
+    if (colorMode != null || podiumMode != null) {
+      const badges = await prisma.badge.findMany({ where: { userId: session.user.id } });
+      if (!isProTier(badges)) {
+        return NextResponse.json({ error: "This feature requires PRO" }, { status: 403 });
+      }
     }
 
     const profile = await prisma.profile.findUnique({
@@ -73,6 +92,8 @@ export async function PATCH(req: Request) {
         ...(layoutType !== undefined && { layoutType }),
         ...(isPublic !== undefined && { isPublic }),
         ...(avatarUrl !== undefined && { avatarUrl }),
+        ...(colorMode !== undefined && { colorMode }),
+        ...(podiumMode !== undefined && { podiumMode }),
       },
     });
 

@@ -1,7 +1,11 @@
 import { prisma } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { PublicProfile } from "@/components/profile/PublicProfile";
+import { SeasonalBanner } from "@/components/profile/SeasonalBanner";
+import { HiddenHunter } from "@/components/profile/HiddenHunter";
+import { getCurrentSeason } from "@/lib/seasons";
 import type { Metadata } from "next";
+import { APP_URL } from "@/lib/constants";
 
 export async function generateMetadata({
   params,
@@ -65,7 +69,7 @@ export default async function UserProfilePage({
       },
       theme: true,
       user: {
-        select: { name: true, image: true, suspendedAt: true },
+        select: { name: true, image: true, suspendedAt: true, createdAt: true },
       },
     },
   });
@@ -93,5 +97,14 @@ export default async function UserProfilePage({
     })
     .catch(() => {});
 
-  return <PublicProfile profile={profile} />;
+  return (
+    <>
+      <SeasonalBanner season={getCurrentSeason()} />
+      <PublicProfile
+        profile={profile}
+        profileUrl={`${APP_URL}/${username}`}
+      />
+      <HiddenHunter />
+    </>
+  );
 }

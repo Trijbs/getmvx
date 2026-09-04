@@ -117,6 +117,10 @@ model Profile {
   isPublic   Boolean @default(true)
   viewCount  Int     @default(0)
   themeId    String?
+  // Profilepodiums — tabbed sections ("stack" | "tabs")  [PRO]
+  podiumMode String  @default("stack")
+  // Per-profile light/dark override ("dark" | "light")  [PRO]
+  colorMode  String  @default("dark")
 
   user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   links   Link[]
@@ -136,6 +140,9 @@ model Link {
   isActive   Boolean @default(true)
   clickCount Int     @default(0)
   groupId    String?
+  // Status/audience labels shown as a small pill on the link button  [FREE]
+  label      String?
+  labelColor String?
 
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 

@@ -16,13 +16,16 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
-    const { title, url, icon, profileId, position } = (await req.json()) as {
-      title: string;
-      url: string;
-      icon?: string;
-      profileId: string;
-      position?: number;
-    };
+    const { title, url, icon, profileId, position, label, labelColor } =
+      (await req.json()) as {
+        title: string;
+        url: string;
+        icon?: string;
+        profileId: string;
+        position?: number;
+        label?: string;
+        labelColor?: string;
+      };
 
     if (!title || !url || !profileId) {
       return NextResponse.json(
@@ -54,6 +57,8 @@ export async function POST(req: Request) {
         url,
         icon: icon || null,
         position: position ?? 0,
+        label: label?.trim() ? label.trim() : null,
+        labelColor: labelColor || null,
       },
     });
 

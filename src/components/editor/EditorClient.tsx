@@ -23,7 +23,11 @@ import { ThemePicker } from "@/components/editor/ThemePicker";
 import { FontPicker } from "@/components/editor/FontPicker";
 import { CssEditor } from "@/components/editor/CssEditor";
 import { WidgetPicker } from "@/components/editor/WidgetPicker";
-import { ProfilePreviewCard } from "@/components/editor/ProfilePreviewCard";
+import { LivePreview } from "@/components/editor/LivePreview";
+import { CopyShare } from "@/components/share/CopyShare";
+import { QrShare } from "@/components/share/QrShare";
+import { Lock } from "@/components/ui/Lock";
+import UpsellModal from "@/components/pro/UpsellModal";
 import { useToast } from "@/components/ui/Toast";
 import { MAX_BIO_LENGTH } from "@/lib/constants";
 import type { Profile, Link, Theme } from "../../../prisma/generated/prisma/client";
@@ -36,6 +40,9 @@ type ProfileWithRelations = Profile & {
 interface EditorClientProps {
   profile: ProfileWithRelations;
   themes: Theme[];
+  isPro: boolean;
+  userId: string;
+  userEmail: string;
 }
 
 interface Widget {
@@ -94,7 +101,7 @@ function Section({
   );
 }
 
-export function EditorClient({ profile, themes }: EditorClientProps) {
+export function EditorClient({ profile, themes, isPro, userId, userEmail }: EditorClientProps) {
   // ── Core state ─────────────────────────────────────────────────────────
   const [links, setLinks] = useState(profile.links);
   const [showAddLink, setShowAddLink] = useState(false);
@@ -108,6 +115,20 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
   const [avatarUrl, setAvatarUrl] = useState(profile.avatarUrl || "");
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [widgets, setWidgets] = useState<Widget[]>([]);
+  const [showUpsell, setShowUpsell] = useState(false);
+
+  // ── Pro toggles (dark/lite + Profilepodiums) ─────────────────────────
+  const [colorMode, setColorMode] = useState<"dark" | "light">(
+    ((profile as Profile & { colorMode?: string }).colorMode ?? "dark") as "dark" | "light"
+  );
+  const [podiumMode, setPodiumMode] = useState<"stack" | "tabs">(
+    ((profile as Profile & { podiumMode?: string }).podiumMode ?? "stack") as "stack" | "tabs"
+  );
+  const usePodiums = podiumMode === "tabs" && links.some((l) => l.groupId);
+
+  function openUpsell() {
+    setShowUpsell(true);
+  }
 
   // ── Derive initial font from theme config ────────────────────────────
   const currentTheme = themes.find((t) => t.id === selectedTheme);
@@ -159,7 +180,24 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  // ── DnD sensors ─────────────────────────────────────────────────────
+  // Editor shortcuts: ⌘K = quick-add link, ⌘/Ctrl+Shift+P = toggle preview.
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+      if (e.key.toLowerCase() === "k" && !e.shiftKey) {
+        e.preventDefault();
+        setShowAddLink((v) => !v);
+        return;
+      }
+      if (e.key.toLowerCase() === "p" && e.shiftKey) {
+        e.preventDefault();
+        setShowPreview((v) => !v);
+      }
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, []);
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
@@ -206,6 +244,8 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
     url: string;
     icon?: string;
     groupId?: string;
+    label?: string;
+    labelColor?: string;
   }) {
     try {
       const res = await fetch("/api/links", {
@@ -262,7 +302,7 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
 
   async function handleUpdateLink(
     id: string,
-    data: { title: string; url: string; icon?: string; groupId?: string }
+    data: { title: string; url: string; icon?: string; groupId?: string; label?: string; labelColor?: string }
   ) {
     try {
       const res = await fetch(`/api/links/${id}`, {
@@ -370,7 +410,13 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
       await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ bio, customCss, layoutType, ...(selectedTheme && { themeId: selectedTheme }) }),
+        body: JSON.stringify({
+          bio,
+          customCss,
+          layoutType,
+          ...(selectedTheme && { themeId: selectedTheme }),
+          ...(isPro && { colorMode, podiumMode }),
+        }),
       });
       if (selectedTheme) {
         await fetch(`/api/themes/${selectedTheme}`, {
@@ -432,6 +478,18 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
               {saving ? "Saving…" : "Save changes"}
             </button>
           </div>
+        </div>
+
+        {/* Share your profile (copy-link FREE · QR PRO) */}
+        <div className="mb-6 flex flex-wrap items-center gap-2">
+          <span className="text-xs font-500 text-[var(--muted)]">Share:</span>
+          <CopyShare url={`/${profile.username}`} />
+          <QrShare
+            url={`/${profile.username}`}
+            isPro={isPro}
+            userId={userId}
+            email={userEmail}
+          />
         </div>
 
         {/* ── Avatar ── */}
@@ -589,11 +647,85 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
               onSelect={(f) => { setSelectedFont(f); markDirty(); }}
             />
           </div>
+
+          {/* Dark / Lite per-profile theme (PRO) */}
+          <div className="mt-5 border-t border-[var(--border)] pt-5">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-600 uppercase tracking-widest text-[var(--muted)]">
+                Profile color mode
+              </p>
+              {!isPro && (
+                <span className="rounded bg-[var(--accent-dim)] px-1.5 py-0.5 text-[10px] font-600 text-[var(--accent)]">
+                  PRO
+                </span>
+              )}
+            </div>
+            <Lock locked={!isPro} feature="dark-lite" onTry={openUpsell}>
+              <div className="flex gap-2">
+                {(["dark", "light"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => { setColorMode(mode); markDirty(); }}
+                    className={`flex-1 rounded-lg border py-2 text-xs font-500 transition-all ${
+                      colorMode === mode
+                        ? "border-[var(--accent)] bg-[var(--accent-dim)] text-[var(--accent)]"
+                        : "border-[var(--border2)] text-[var(--muted)] hover:border-[var(--accent)]/40"
+                    }`}
+                  >
+                    {mode === "dark" ? "Dark" : "Lite"}
+                  </button>
+                ))}
+              </div>
+            </Lock>
+          </div>
+
+          {/* Profilepodiums — tabbed sections (PRO) */}
+          <div className="mt-5 border-t border-[var(--border)] pt-5">
+            <div className="mb-2 flex items-center justify-between">
+              <p className="text-xs font-600 uppercase tracking-widest text-[var(--muted)]">
+                Sections
+              </p>
+              {!isPro && (
+                <span className="rounded bg-[var(--accent-dim)] px-1.5 py-0.5 text-[10px] font-600 text-[var(--accent)]">
+                  PRO
+                </span>
+              )}
+            </div>
+            <Lock locked={!isPro} feature="podiums" onTry={openUpsell}>
+              <div className="flex gap-2">
+                {(["stack", "tabs"] as const).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => { setPodiumMode(mode); markDirty(); }}
+                    className={`flex-1 rounded-lg border py-2 text-xs font-500 transition-all ${
+                      podiumMode === mode
+                        ? "border-[var(--accent)] bg-[var(--accent-dim)] text-[var(--accent)]"
+                        : "border-[var(--border2)] text-[var(--muted)] hover:border-[var(--accent)]/40"
+                    }`}
+                  >
+                    {mode === "stack" ? "Stack all" : "Tabs"}
+                  </button>
+                ))}
+              </div>
+            </Lock>
+            {usePodiums && (
+              <p className="mt-1.5 text-[11px] text-[var(--muted)]">
+                Tabbed sections appear once you add links with a Section label.
+              </p>
+            )}
+          </div>
         </Section>
 
         {/* ── Advanced — Custom CSS ── */}
         <Section title="Advanced (CSS)" defaultOpen={false}>
-          <CssEditor value={customCss} onChange={(v) => { setCustomCss(v); markDirty(); }} />
+          <CssEditor
+            value={customCss}
+            onChange={(v) => { setCustomCss(v); markDirty(); }}
+            isPro={isPro}
+            onLocked={openUpsell}
+          />
         </Section>
       </div>
 
@@ -613,13 +745,16 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
             <XIcon size={18} aria-hidden="true" />
           </button>
         </div>
-        <ProfilePreviewCard
+        <LivePreview
           username={profile.username}
           bio={bio}
           links={links}
           themeId={selectedTheme}
           themes={themes}
-          fontFamily={selectedFont}
+          layoutType={layoutType}
+          customCss={customCss}
+          colorMode={colorMode}
+          podiumMode={podiumMode}
         />
       </div>
 
@@ -648,12 +783,23 @@ export function EditorClient({ profile, themes }: EditorClientProps) {
             url: editingLink.url,
             icon: editingLink.icon ?? undefined,
             groupId: editingLink.groupId ?? undefined,
+            label: editingLink.label ?? undefined,
+            labelColor: editingLink.labelColor ?? undefined,
           }}
           sections={sections}
           onEdit={handleUpdateLink}
           onClose={() => setEditingLink(null)}
         />
       )}
+
+      <UpsellModal
+        open={showUpsell}
+        title="Unlock this Pro feature"
+        message="This editor lives inside mvx — where your profile becomes yours. Upgrade to unlock dark/lite themes, Profilepodiums sections, CSS templates, custom CSS, and QR shares."
+        userId={userId}
+        email={userEmail}
+        onClose={() => setShowUpsell(false)}
+      />
     </div>
   );
 }

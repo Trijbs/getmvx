@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { redirect } from "next/navigation";
 import { EditorClient } from "@/components/editor/EditorClient";
+import { isProTier } from "@/lib/features";
 
 export default async function EditorPage() {
   const session = await auth();
@@ -10,13 +11,16 @@ export default async function EditorPage() {
     redirect("/login");
   }
 
-  const profile = await prisma.profile.findUnique({
-    where: { userId: session.user.id },
-    include: {
-      links: { orderBy: { position: "asc" } },
-      theme: true,
-    },
-  });
+  const [profile, badges] = await Promise.all([
+    prisma.profile.findUnique({
+      where: { userId: session.user.id },
+      include: {
+        links: { orderBy: { position: "asc" } },
+        theme: true,
+      },
+    }),
+    prisma.badge.findMany({ where: { userId: session.user.id } }),
+  ]);
 
   if (!profile) {
     redirect("/onboarding");
@@ -27,5 +31,13 @@ export default async function EditorPage() {
     orderBy: { name: "asc" },
   });
 
-  return <EditorClient profile={profile} themes={themes} />;
+  return (
+    <EditorClient
+      profile={profile}
+      themes={themes}
+      isPro={isProTier(badges)}
+      userId={session.user.id}
+      userEmail={session.user.email ?? ""}
+    />
+  );
 }
