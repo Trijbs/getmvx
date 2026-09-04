@@ -18,12 +18,22 @@ export const {
   },
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+      clientId:
+        process.env.GOOGLE_CLIENT_ID || process.env.AUTH_GOOGLE_ID || undefined,
+      clientSecret:
+        process.env.GOOGLE_CLIENT_SECRET ||
+        process.env.AUTH_GOOGLE_SECRET ||
+        undefined,
     }),
     Discord({
-      clientId: process.env.DISCORD_CLIENT_ID ?? "",
-      clientSecret: process.env.DISCORD_CLIENT_SECRET ?? "",
+      clientId:
+        process.env.DISCORD_CLIENT_ID ||
+        process.env.AUTH_DISCORD_ID ||
+        undefined,
+      clientSecret:
+        process.env.DISCORD_CLIENT_SECRET ||
+        process.env.AUTH_DISCORD_SECRET ||
+        undefined,
     }),
     Credentials({
       name: "credentials",
