@@ -76,6 +76,12 @@ function tick(timestamp: number) {
 
   emitStore();
   frameCallbacks.forEach((callback) => callback(state));
+
+  if (frameCallbacks.size > 0 || storeListeners.size > 0) {
+    rafId = requestAnimationFrame(tick);
+  } else {
+    rafId = null;
+  }
 }
 
 function ensureRafRunning() {
