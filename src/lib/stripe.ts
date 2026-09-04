@@ -4,7 +4,7 @@ const apiKey = process.env.STRIPE_SECRET_KEY;
 
 export const stripe = apiKey
   ? new Stripe(apiKey, {
-      apiVersion: "2026-06-24.dahlia",
+      apiVersion: "2026-07-29.dahlia",
       typescript: true,
     })
   : null;
