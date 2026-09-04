@@ -51,14 +51,14 @@ export async function GET() {
     const dailyViews = await prisma.$queryRaw<
       { date: string; count: bigint }[]
     >`
-      SELECT 
-        TO_CHAR(DATE(created_at), 'YYYY-MM-DD') as date,
+      SELECT
+        TO_CHAR(DATE("createdAt"), 'YYYY-MM-DD') as date,
         COUNT(*)::bigint as count
       FROM "AnalyticsEvent"
       WHERE "profileId" = ${profile.id}
         AND type = 'VIEW'
-        AND created_at >= ${thirtyDaysAgo}
-      GROUP BY DATE(created_at)
+        AND "createdAt" >= ${thirtyDaysAgo}
+      GROUP BY DATE("createdAt")
       ORDER BY date ASC
     `;
 
@@ -66,14 +66,14 @@ export async function GET() {
     const dailyClicks = await prisma.$queryRaw<
       { date: string; count: bigint }[]
     >`
-      SELECT 
-        TO_CHAR(DATE(created_at), 'YYYY-MM-DD') as date,
+      SELECT
+        TO_CHAR(DATE("createdAt"), 'YYYY-MM-DD') as date,
         COUNT(*)::bigint as count
       FROM "AnalyticsEvent"
       WHERE "profileId" = ${profile.id}
         AND type = 'CLICK'
-        AND created_at >= ${thirtyDaysAgo}
-      GROUP BY DATE(created_at)
+        AND "createdAt" >= ${thirtyDaysAgo}
+      GROUP BY DATE("createdAt")
       ORDER BY date ASC
     `;
 
