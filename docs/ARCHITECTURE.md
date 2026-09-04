@@ -32,8 +32,9 @@ help@/info@getmvx.cc ──► Cloudflare Email Worker (email-worker/) — parse
 ```text
 src/
   app/            Routes. Route groups: (auth) public auth pages, (app) authenticated app.
-  components/     By feature: landing/ editor/ dashboard/ analytics/ profile/ settings/ pro/ brand/ ui/
+  components/     By feature: landing/ editor/ dashboard/ analytics/ profile/ settings/ pro/ brand/ ui/ motion/
   lib/            All integrations & domain logic (one file per concern):
+                    motion/       Scroll-driven animation core (math.ts, scroll.ts, timeline.ts)
                     auth.ts       NextAuth v5 config (JWT strategy; credentials + Google + Discord)
                     db.ts         Prisma singleton (Neon adapter, poolQueryViaFetch for edge/workers)
                     gumroad.ts    Webhook verification (verifySellerId, verifySale) + Pro status grant
@@ -47,7 +48,7 @@ src/
                     validate-url.ts  URL scheme validation (http/https/mailto/tel)
                     pricing.ts    Shared pricing constants (PRICING) for Pro / Verified pricing
                     constants.ts  Shared app constants (MAX_BIO_LENGTH, APP_DOMAIN, APP_URL)
-  hooks/          Client hooks
+  hooks/          Client hooks (incl. useScroll, useIsDesktop, usePrefersReducedMotion)
   types/          Shared TS types
   middleware.ts   Redirect logic (see Auth below)
 prisma/           schema.prisma, migrations/, seed.ts, generated/ (generated client — imported by src/lib/db.ts)
@@ -55,7 +56,17 @@ email-worker/     Standalone Cloudflare Worker (own package.json + wrangler.json
 public/           Static assets, brand files
 ```
 
-## Auth
+## Landing scroll experience
+
+The landing page (`src/app/page.tsx`) is a scroll-driven, cinematic presentation split into numbered chapters (`// 01 — THE PITCH` … `// 07 — EARLY ACCESS`). Scrolling *is* the animation playhead — native scrolling, not hijacked; all animation reads position and time. The only added dependency is **gsap** (ScrollTrigger only, no ScrollSmoother).
+
+Core rules:
+
+- **One rAF loop.** `src/lib/motion/scroll.ts` owns a singleton `ScrollState` (y, velocity, direction, viewport size) updated by a single `requestAnimationFrame` loop. Everything reads it: components subscribe via `useScrollFrame` (a stable callback-ref pattern in `src/hooks/useScroll.ts`) or `useScrollState`. Motion writes to `transform`/`opacity` inline styles — nothing animates layout properties.
+- **GSAP timeline hook.** `src/lib/motion/timeline.ts` (`useScrollTimeline`) creates a `gsap.context`-scoped, `ScrollTrigger`-scrubbed timeline per section. Pinned chapters (`PinSection`, `CollectionStory`) hold a scrolled spacer (height × VH) while an inner block is `position: sticky`. `ScrollTrigger.config({ ignoreMobileResize })` avoids iOS jank.
+- **Guardrails applied compositively.** Every animated component gates on **desktop (`useIsDesktop`, ≥1024px) AND reduced motion off (`usePrefersReducedMotion`)**. On mobile and under `prefers-reduced-motion`, sections render their content statically in natural flow — no pinning, no horizontal rail, no parallax. Nav gets another override: it never hides itself for reduced motion.
+- **Lookbook drift** (`Lookbook`) converts vertical scroll into a horizontal rail by writing `translate3d` from `useScrollFrame` (no second ScrollTrigger) — computes `rail.scrollWidth − viewport`, guarded to the pinned spacer.
+- **Content stays real.** The hero waitlist form, `ProfilePreview` theme tabs (clickable while pinned), Pricing copy/links (`src/lib/pricing.ts`), anchors (`#platform`, `#features`, `#customize`, `#pricing`, `#early-access`), and the `<html>` smooth-scroll anchor behavior are all preserved.
 
 - **NextAuth v5 (Auth.js) with the JWT session strategy** — no DB sessions. Config in `src/lib/auth.ts`.
 - Providers: **credentials** (bcryptjs-hashed passwords), **Google**, **Discord**.
@@ -170,4 +181,4 @@ Vitest is set up (`vitest.config.ts`; tests live next to source as `src/**/*.tes
 npm run lint && npx tsc --noEmit && npm test && npm run build
 ```
 
-…and for user-facing changes, exercise the affected flow in `npm run dev` (register → onboard → edit → view public profile → click a link → check analytics is the core smoke path). CI runs lint → typecheck → test → build.
+…and for user-facing changes, exercise the affected flow in `npm run dev` (register → onboard → edit → view public profile → click a link → check analytics is the core smoke path). For landing motion changes, verify in the browser at desktop + mobile widths and with OS reduced motion on. CI runs lint → typecheck → test → build.
