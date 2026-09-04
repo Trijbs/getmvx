@@ -81,7 +81,7 @@ export function Lookbook() {
 
     const rect = section.getBoundingClientRect();
     const progress = clamp(
-      (state.viewportH - rect.top) / (rect.height - state.viewportH),
+      -rect.top / (rect.height - state.viewportH),
       0,
       1,
     );
