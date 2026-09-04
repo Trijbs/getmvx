@@ -39,7 +39,7 @@ export function CollectionStory() {
       tl.to(q(".story-chip, .story-tag"), { x: -90, opacity: 0, duration: 0.3, ease: "power2.in" }, 0.38);
 
       if (stage) {
-        const diveScale = Math.min(2.9, Math.max(2.0, window.innerWidth / 520));
+        const diveScale = Math.min(1.9, Math.max(1.5, window.innerWidth / 520));
         tl.to(
           stage,
           {
@@ -53,12 +53,12 @@ export function CollectionStory() {
           0.3,
         );
         tl.to(q(".story-glow"), { scale: 1.15, opacity: 0.95, duration: 0.3, ease: "power2.out" }, 1.4);
-        tl.to(stage, { scale: diveScale * 0.96, duration: 0.3, ease: "power2.in" }, 1.7);
+        tl.to(stage, { scale: diveScale * 0.96, duration: 0.3, ease: "power2.in" }, 1.55);
       }
 
-      tl.fromTo(q(".story-hold"), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power3.out", immediateRender: true }, 1.4);
-      tl.to(q(".story-hold"), { y: -22, opacity: 0, duration: 0.26, ease: "power2.in" }, 1.7);
-      tl.to(q(".story-card"), { rotationX: 88, y: -56, opacity: 0, transformOrigin: "50% 100%", ease: "power2.in", duration: 0.3 }, 1.7);
+      tl.fromTo(q(".story-watermark"), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power3.out", immediateRender: true }, 1.4);
+      tl.to(q(".story-watermark"), { y: -16, opacity: 0, duration: 0.25, ease: "power2.in" }, 1.55);
+      tl.to(q(".story-card"), { rotationX: 88, y: -56, opacity: 0, transformOrigin: "50% 100%", ease: "power2.in", duration: 0.3 }, 1.55);
     },
   });
 
@@ -70,11 +70,12 @@ export function CollectionStory() {
             <BrandSymbol name="constellation" size={460} className="max-w-[min(520px,70vw)]" />
           </Parallax>
 
-          <div className="story-hold pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-0">
-            <span className="max-w-[720px] px-[5%] text-center font-display text-[clamp(28px,4.5vw,56px)] font-[800] uppercase leading-[0.95] tracking-[-0.01em] text-[var(--text)]">
-              The whole you.
-              <br />
-              <span className="text-[var(--accent2)]">One link.</span>
+          <div className="story-watermark pointer-events-none absolute left-[5%] top-[8%] z-20 opacity-0">
+            <span className="block font-mono text-[10px] tracking-[0.28em] text-[var(--accent)]">
+              THE WHOLE YOU
+            </span>
+            <span className="mt-1 block font-mono text-[10px] tracking-[0.28em] text-[var(--muted-dim)]">
+              {"//"} ONE LINK
             </span>
           </div>
 
