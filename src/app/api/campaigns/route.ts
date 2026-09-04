@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { requireAdminApi, audit } from "@/lib/admin";
 import { createCampaign, sendCampaign, getCampaigns } from "@/lib/brevo";
 
 const DEFAULT_SENDER = {
@@ -7,6 +8,11 @@ const DEFAULT_SENDER = {
 };
 
 export async function GET() {
+  const admin = await requireAdminApi();
+  if (!admin) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   try {
     const result = await getCampaigns();
     return NextResponse.json(result);
@@ -18,6 +24,11 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const admin = await requireAdminApi();
+  if (!admin) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   try {
     const body = await request.json();
     const { name, subject, htmlContent, textContent, listIds, scheduledAt, tags } = body as {
@@ -37,12 +48,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const sender = (body as { sender?: { email: string; name?: string } }).sender ?? DEFAULT_SENDER;
-
     const result = await createCampaign({
       name,
       subject,
-      sender,
+      sender: DEFAULT_SENDER,
       htmlContent,
       textContent,
       listIds,
@@ -50,10 +59,15 @@ export async function POST(request: NextRequest) {
       tags,
     });
 
-    // Send immediately if no scheduled time
     if (!scheduledAt) {
       await sendCampaign(result.campaignId);
     }
+
+    await audit(admin.user.id, "campaign.create", { type: "campaign", id: String(result.campaignId) }, {
+      name,
+      listIds,
+      scheduled: !!scheduledAt,
+    });
 
     return NextResponse.json({
       success: true,

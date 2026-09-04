@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { rateLimit } from "@/lib/ratelimit";
+import { isValidLinkUrl } from "@/lib/validate-url";
 
 export async function PATCH(
   req: Request,
@@ -10,6 +12,11 @@ export async function PATCH(
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = await rateLimit(`links:${session.user.id}`, 30, 60);
+    if (!rl.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
     const { id } = await params;
@@ -38,7 +45,15 @@ export async function PATCH(
       groupId?: string | null;
     } = {};
     if (typeof body.title === "string") data.title = body.title;
-    if (typeof body.url === "string") data.url = body.url;
+    if (typeof body.url === "string") {
+      if (!isValidLinkUrl(body.url)) {
+        return NextResponse.json(
+          { error: "Invalid URL. Must start with http://, https://, mailto:, or tel:" },
+          { status: 400 }
+        );
+      }
+      data.url = body.url;
+    }
     if (typeof body.icon === "string" || body.icon === null)
       data.icon = body.icon as string | null;
     if (typeof body.position === "number") data.position = body.position;
@@ -69,6 +84,11 @@ export async function DELETE(
     const session = await auth();
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const rl = await rateLimit(`links:${session.user.id}`, 30, 60);
+    if (!rl.success) {
+      return NextResponse.json({ error: "Too many requests" }, { status: 429 });
     }
 
     const { id } = await params;

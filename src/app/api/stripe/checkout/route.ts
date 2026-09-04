@@ -19,6 +19,11 @@ export async function POST(req: Request) {
 
     const { priceId } = (await req.json()) as { priceId: string };
 
+    // Validate priceId format — Stripe price IDs always start with "price_"
+    if (!priceId || typeof priceId !== "string" || !priceId.startsWith("price_")) {
+      return NextResponse.json({ error: "Invalid price" }, { status: 400 });
+    }
+
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
     });

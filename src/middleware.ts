@@ -43,7 +43,7 @@ export const config = {
     "/editor/:path*",
     "/analytics/:path*",
     "/settings/:path*",
-    "/onboarding",
+    "/onboarding/:path*",
     "/login",
     "/register",
   ],

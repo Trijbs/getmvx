@@ -25,9 +25,10 @@ export async function POST() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Find Stripe customer
+    // Find Stripe customer — escape email to prevent query injection
+    const escapedEmail = user.email.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
     const customers = await stripe.customers.search({
-      query: `email:'${user.email}'`,
+      query: `email:'${escapedEmail}'`,
     });
 
     if (customers.data.length === 0) {
