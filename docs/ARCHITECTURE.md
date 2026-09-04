@@ -14,7 +14,6 @@ Browser ──► Next.js on Vercel
               ├── src/app/(auth)/          login, register, verify-email, reset-password, onboarding
               ├── src/app/(app)/           dashboard, editor, analytics, settings   (auth required)
               ├── src/app/[username]/      public profile (root pretty URL)
-              ├── src/app/u/[username]/    public profile (legacy path)
               ├── src/app/terms|privacy/   legal pages
               └── src/app/api/*            route handlers (see API surface below)
                         │
@@ -45,6 +44,9 @@ src/
                     sanitize.ts   Custom-CSS sanitizer for user themes
                     themes.ts     10 built-in theme presets
                     reserved-usernames.ts  Usernames that would shadow routes
+                    validate-url.ts  URL scheme validation (http/https/mailto/tel)
+                    pricing.ts    Shared pricing constants (PRICING) for Pro / Verified pricing
+                    constants.ts  Shared app constants (MAX_BIO_LENGTH, APP_DOMAIN, APP_URL)
   hooks/          Client hooks
   types/          Shared TS types
   middleware.ts   Redirect logic (see Auth below)
@@ -86,19 +88,19 @@ Prisma 7 with `@prisma/adapter-neon`; the client is **generated into `prisma/gen
 
 ## API surface
 
-All handlers under `src/app/api/`. Mutating routes check session ownership; abuse-prone routes are rate-limited.
+All handlers under `src/app/api/`. Mutating routes check session ownership; **all mutating routes are rate-limited**. Input length and format validation is enforced at the API boundary.
 
 | Area | Routes | Notes |
 | --- | --- | --- |
-| Auth | `auth/register`, `auth/verify-email`, `auth/forgot-password`, `auth/reset-password`, `auth/[...nextauth]` | Rate-limited |
-| Profile | `profile` (PATCH bio/theme/CSS/visibility), `profile/setup` (username claim), `profile/avatar` (presigned R2 upload) | Custom CSS passes through `sanitize.ts` server-side before save |
-| Links | `links` (POST), `links/[id]` (PATCH/DELETE), `links/reorder` | Ownership enforced |
-| Widgets | `widgets`, `widgets/[id]` | Platform embeds CRUD |
-| Themes | `themes/[id]` | Custom themes |
+| Auth | `auth/register`, `auth/verify-email`, `auth/forgot-password`, `auth/reset-password`, `auth/[...nextauth]` | Rate-limited; email validated against safe string-based check |
+| Profile | `profile` (PATCH bio/theme/CSS/visibility), `profile/setup` (username claim), `profile/avatar` (presigned R2 upload) | Custom CSS passes through `sanitize.ts` server-side before save; input length enforced (bio, avatar URL) |
+| Links | `links` (POST), `links/[id]` (PATCH/DELETE), `links/reorder` | Ownership enforced; URL validated via `validate-url.ts`; title/description length enforced |
+| Widgets | `widgets`, `widgets/[id]` | Platform embeds CRUD; config size limit enforced |
+| Themes | `themes/[id]` | Custom themes; config size limit enforced |
 | Analytics | `analytics/click` (public click tracking), `analytics/overview` (dashboard data) | |
 | OG | `og/[username]` | Dynamic Open Graph image per profile |
 | Billing | `webhooks/gumroad` (live), `stripe/checkout` + `stripe/portal` + `stripe/webhook` (scaffolded) | See Payments |
-| Marketing | `waitlist`, `newsletter` (POST/DELETE), `campaigns` | Brevo-backed |
+| Marketing | `waitlist`, `newsletter` (POST/DELETE), `campaigns` | Brevo-backed; `campaigns` is admin-gated; `newsletter` DELETE is auth-gated |
 
 ## Payments
 
@@ -141,18 +143,21 @@ Two independent systems:
 | Threat | Defense | Where |
 | --- | --- | --- |
 | CSS injection via custom themes | Server-side sanitizer strips `@import`, `url()`, `expression()`, `javascript:` | `src/lib/sanitize.ts`, applied in profile PATCH |
-| Malicious link URLs | Scheme validation before rendering | Public profile rendering |
+| Malicious link URLs | Scheme validation (`http`, `https`, `mailto`, `tel`) before create/update | `src/lib/validate-url.ts`, applied in links POST and PATCH |
 | Fake Pro grants | Webhook fails closed: seller-id gate + sale verification against Gumroad API | `src/lib/gumroad.ts` |
 | Route shadowing | Reserved username list checked at claim time | `src/lib/reserved-usernames.ts` |
-| Credential stuffing / abuse | Per-IP rate limiting (Upstash) on auth, waitlist, click endpoints — **fails open** if Upstash is unconfigured | `src/lib/ratelimit.ts` |
+| Credential stuffing / abuse | Per-IP rate limiting (Upstash) on **all** mutating endpoints — **fails open** if Upstash is unconfigured | `src/lib/ratelimit.ts`, applied in every route handler |
 | IDOR | Ownership checks on every mutating route | Each handler |
+| Input abuse | Length and format validation on profile fields, link titles, theme configs, and emails at the API boundary | Each route handler |
+| CSV injection | Leading `=+-@\t\r` characters neutralized in waitlist CSV export | `src/app/api/admin/waitlist/export/route.ts` |
+| Missing security headers | `vercel.json` sets `X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`, `Permissions-Policy`, `HSTS` on all routes; API routes also set `Cache-Control: no-store` | `vercel.json` |
 | Secrets | Env-only; CI build uses dummy `NEXTAUTH_*` placeholders, never real secrets | `.github/workflows/ci.yml` |
 
 Sentry captures client, edge, and server errors (`sentry.*.config.ts` at repo root, `src/instrumentation.ts`).
 
 ## Deployment & CI
 
-- **Production: Vercel.** `vercel.json` pins install to `npm ci`. Push to `main` → deploy. DNS on Cloudflare.
+- **Production: Vercel.** `vercel.json` pins install to `npm ci` and sets security headers (`HSTS`, `X-Frame-Options`, etc.) plus API-level `Cache-Control: no-store`. Push to `main` → deploy. DNS on Cloudflare.
 - **Alternative path: Cloudflare** via `@opennextjs/cloudflare` (`open-next.config.ts`, `wrangler.toml`, `npm run pages:build|pages:deploy`). Kept working (e.g. `poolQueryViaFetch` in `db.ts`) but Vercel is the live target.
 - **CI** (`.github/workflows/ci.yml`): `npm ci` → `prisma generate` → lint → `tsc --noEmit` → `next build`, plus a CodeQL workflow. The build runs without a real database.
 - **Dependencies**: plain npm resolution — `legacy-peer-deps` was dropped when `@sentry/nextjs` 10 added Next 16 peer support. Don't reintroduce it.

@@ -122,9 +122,18 @@ Production runs on **Vercel** (installs with `npm ci` per `vercel.json`); push t
 
 ## Security
 
-See [ARCHITECTURE — Security](docs/ARCHITECTURE.md#security-model) for the full model. Highlights: server-side CSS sanitization, scheme-validated link URLs, ownership checks on all mutating routes, signature-verified Gumroad webhook (fails closed), per-IP rate limiting, reserved-username protection.
+See [ARCHITECTURE — Security](docs/ARCHITECTURE.md#security-model) for the full model, and [SECURITY.md](./SECURITY.md) for the vulnerability disclosure policy. Highlights:
 
-To report a vulnerability, contact the maintainer privately rather than opening a public issue.
+- Server-side CSS sanitization; URL-scheme validation on all link create/update
+- Ownership checks on every mutating route; admin gates on `/api/campaigns` and newsletter `DELETE`
+- Per-IP rate limiting on **all** mutating endpoints (Upstash, fails open when unconfigured)
+- Input length and format validation at the API boundary (profile fields, link titles, theme configs, emails)
+- CSV injection prevention on waitlist export
+- Security headers via `vercel.json`: `HSTS`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`
+- Stripe checkout `priceId` validated before use; Gumroad webhook fails closed
+- Debug logging removed from production code; legacy `/u/` route deleted
+
+To report a vulnerability, see [SECURITY.md](./SECURITY.md).
 
 ## License
 

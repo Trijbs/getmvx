@@ -23,7 +23,7 @@ Free tier + **Pro at €3.99/mo or €31.99/yr (33% off)**, optional **Verified 
 
 ## Where we are
 
-The core product is **built and deployed on Vercel**: auth (credentials + Google + Discord, email verification, password reset), profile editor with drag-and-drop links, themes, custom CSS, widgets, avatar upload, public profiles at root usernames, analytics dashboard, dynamic OG images, waitlist + newsletter, rate limiting, reserved usernames, CSS sanitization, Sentry monitoring, and a verified Gumroad Pro webhook. Legal pages (`/terms`, `/privacy`) exist as routes.
+The core product is **built and deployed on Vercel**: auth (credentials + Google + Discord, email verification, password reset), profile editor with drag-and-drop links, themes, custom CSS, widgets, avatar upload, public profiles at root usernames, analytics dashboard, dynamic OG images, waitlist + newsletter, rate limiting, reserved usernames, CSS sanitization, Sentry monitoring, and a verified Gumroad Pro webhook. Legal pages (`/terms`, `/privacy`) exist as routes. A full security and UX overhaul shipped in September 2026: admin-gated campaign/newsletter endpoints, hardened Stripe checkout, rate limiting on every mutating endpoint, input length/format/URL validation, CSV injection prevention, error boundaries, loading skeletons, proper toast notifications, mobile nav + responsive editor preview, Ctrl/Cmd+S save, ARIA improvements, and lazy-loaded heavy bundles.
 
 ## North star (current phase)
 
