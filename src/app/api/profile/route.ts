@@ -48,7 +48,7 @@ export async function PATCH(req: Request) {
     if (avatarUrl && avatarUrl.length > 2048) {
       return NextResponse.json({ error: "Avatar URL is too long" }, { status: 400 });
     }
-    const VALID_LAYOUTS = ["centered", "left-aligned", "grid"];
+    const VALID_LAYOUTS = ["centered", "grid", "minimal"];
     if (layoutType != null && !VALID_LAYOUTS.includes(layoutType as string)) {
       return NextResponse.json({ error: "Invalid layout type" }, { status: 400 });
     }

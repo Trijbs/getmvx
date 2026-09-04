@@ -33,10 +33,9 @@ const CATEGORIES: readonly Category[] = [
     id: "layouts",
     label: "Layouts",
     tier: "pro",
-    description:
-      "Centered, left-aligned, card-style, minimal, editorial. Or build your own grid",
+    description: "Centered, grid, minimal. Or build your own custom layout",
     previewVariant: "layout",
-    variants: ["centered", "left-aligned", "card-style", "minimal", "editorial"],
+    variants: ["centered", "grid", "minimal"],
   },
   {
     id: "backgrounds",
@@ -209,21 +208,13 @@ export function Customize() {
 
   const LAYOUT_CLASS_MAP: Record<string, string> = {
     centered: "text-center items-center",
-    "left-aligned": "text-left items-start",
-    "card-style": "text-center items-center px-3",
     minimal: "text-left items-start px-2",
-    editorial: "text-left items-start pl-6 pr-4",
   };
   const layoutClasses =
     LAYOUT_CLASS_MAP[layoutVariant] ?? "text-center items-center";
 
-  const isCardStyle = layoutVariant === "card-style";
   const isMinimal = layoutVariant === "minimal";
-  const isEditorial = layoutVariant === "editorial";
-  const alignStart =
-    layoutVariant === "left-aligned" ||
-    layoutVariant === "minimal" ||
-    layoutVariant === "editorial";
+  const alignStart = layoutVariant === "minimal";
 
   function getBannerStyle(): CSSProperties {
     switch (bgVariant) {
@@ -453,34 +444,20 @@ export function Customize() {
 
               {/* Body */}
               <div
-                className={`relative flex flex-col pb-6 pt-0 transition-all duration-300 ${layoutClasses} ${
-                  isCardStyle ? "px-3" : "px-5"
+                className={`relative px-5 pb-6 pt-0 transition-all duration-300 ${
+                  layoutVariant === "grid"
+                    ? "grid grid-cols-2 gap-3 items-center text-left"
+                    : `flex flex-col ${layoutClasses}`
                 }`}
               >
-                {isCardStyle && (
-                  <div className="relative -mt-4 rounded-2xl border border-[var(--border2)] bg-[#0e0b06]/90 p-4 shadow-inner">
-                    <ProfileBody
-                      activeId={activeId}
-                      alignStart={alignStart}
-                      fonts={fonts}
-                      isEditorial={isEditorial}
-                      isMinimal={isMinimal}
-                      reducedMotion={reducedMotion}
-                      getButtonClasses={getButtonClasses}
-                    />
-                  </div>
-                )}
-                {!isCardStyle && (
-                  <ProfileBody
-                    activeId={activeId}
-                    alignStart={alignStart}
-                    fonts={fonts}
-                    isEditorial={isEditorial}
-                    isMinimal={isMinimal}
-                    reducedMotion={reducedMotion}
-                    getButtonClasses={getButtonClasses}
-                  />
-                )}
+                <ProfileBody
+                  activeId={activeId}
+                  alignStart={alignStart}
+                  fonts={fonts}
+                  isMinimal={isMinimal}
+                  reducedMotion={reducedMotion}
+                  getButtonClasses={getButtonClasses}
+                />
               </div>
             </div>
           </div>
@@ -500,7 +477,6 @@ function ProfileBody({
   activeId,
   alignStart,
   fonts,
-  isEditorial,
   isMinimal,
   reducedMotion,
   getButtonClasses,
@@ -508,7 +484,6 @@ function ProfileBody({
   activeId: CategoryId;
   alignStart: boolean;
   fonts: (typeof TYPOGRAPHY_FONTS)[number];
-  isEditorial: boolean;
   isMinimal: boolean;
   reducedMotion: boolean;
   getButtonClasses: (label: string) => string;
@@ -528,9 +503,7 @@ function ProfileBody({
       )}
 
       <div
-        className={`relative w-full ${isMinimal ? "mt-2" : ""} ${
-          isEditorial ? "border-l-2 border-[var(--accent)]/40 pl-3" : ""
-        }`}
+        className={`relative w-full ${isMinimal ? "mt-2" : ""}`}
       >
         <Spotlight
           active={activeId === "typography"}
@@ -546,9 +519,7 @@ function ProfileBody({
         )}
 
         <div
-          className={`mb-2.5 font-700 text-[#f0e8d0] transition-all duration-300 ${
-            isEditorial ? "text-[22px] leading-none tracking-wide" : "text-[17px]"
-          }`}
+          className="mb-2.5 font-700 text-[17px] text-[#f0e8d0] transition-all duration-300"
           style={{ fontFamily: fonts.headline }}
         >
           trijbsworld
@@ -560,9 +531,7 @@ function ProfileBody({
           @trijbs
         </div>
         <div
-          className={`mb-3.5 text-xs leading-relaxed text-[#7a6a4a] transition-all duration-300 ${
-            isEditorial ? "max-w-[85%] text-[13px] italic" : "px-1"
-          }`}
+          className="mb-3.5 px-1 text-xs leading-relaxed text-[#7a6a4a] transition-all duration-300"
           style={{ fontFamily: fonts.body }}
         >
           brand design studio. trijbsworld.nl. We make brands that last
