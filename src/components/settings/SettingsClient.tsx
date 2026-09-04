@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { Profile } from "../../../prisma/generated/prisma/client";
 import { UpgradeButton } from "@/components/pro/UpgradeButton";
+import { useToast } from "@/components/ui/Toast";
+import { MAX_BIO_LENGTH, APP_DOMAIN } from "@/lib/constants";
 
 interface SettingsClientProps {
   profile: Profile;
@@ -16,11 +18,10 @@ export function SettingsClient({ profile, user, isPro }: SettingsClientProps) {
   const [bio, setBio] = useState(profile.bio || "");
   const [isPublic, setIsPublic] = useState(profile.isPublic);
   const [saving, setSaving] = useState(false);
-  const [message, setMessage] = useState("");
+  const { addToast } = useToast();
 
   async function handleSave() {
     setSaving(true);
-    setMessage("");
 
     try {
       const res = await fetch("/api/profile", {
@@ -31,11 +32,9 @@ export function SettingsClient({ profile, user, isPro }: SettingsClientProps) {
 
       if (!res.ok) throw new Error("Failed to save");
 
-      setMessage("Settings saved!");
-      setTimeout(() => setMessage(""), 2000);
+      addToast("Settings saved!", "success");
     } catch {
-      setMessage("Failed to save");
-      setTimeout(() => setMessage(""), 2000);
+      addToast("Failed to save", "error");
     } finally {
       setSaving(false);
     }
@@ -54,7 +53,7 @@ export function SettingsClient({ profile, user, isPro }: SettingsClientProps) {
         <div className="mb-4">
           <label className="mb-1.5 block text-sm font-500">Username</label>
           <div className="flex items-center overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--bg)] px-4 py-2.5">
-            <span className="text-sm text-[var(--muted)]">getmvx.cc/</span>
+            <span className="text-sm text-[var(--muted)]">{APP_DOMAIN}/</span>
             <span className="text-sm font-500">{username}</span>
           </div>
           <p className="mt-1 text-xs text-[var(--muted)]">
@@ -67,13 +66,13 @@ export function SettingsClient({ profile, user, isPro }: SettingsClientProps) {
           <textarea
             value={bio}
             onChange={(e) => setBio(e.target.value)}
-            maxLength={160}
+            maxLength={MAX_BIO_LENGTH}
             rows={3}
             className="w-full resize-none rounded-lg border border-[var(--border2)] bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
             placeholder="Tell the world about yourself..."
           />
           <p className="mt-1 text-right text-xs text-[var(--muted)]">
-            {bio.length}/160
+            {bio.length}/{MAX_BIO_LENGTH}
           </p>
         </div>
 
@@ -86,6 +85,9 @@ export function SettingsClient({ profile, user, isPro }: SettingsClientProps) {
           </div>
           <button
             onClick={() => setIsPublic(!isPublic)}
+            role="switch"
+            aria-checked={isPublic}
+            aria-label={`Public profile: ${isPublic ? "on" : "off"}`}
             className={`relative h-6 w-11 rounded-full transition-colors ${
               isPublic ? "bg-[var(--accent)]" : "bg-[var(--bg4)]"
             }`}
@@ -118,7 +120,7 @@ export function SettingsClient({ profile, user, isPro }: SettingsClientProps) {
               target="_blank"
               className="text-sm text-[var(--accent)] hover:underline"
             >
-              getmvx.cc/{profile.username}
+              {APP_DOMAIN}/{profile.username}
             </a>
           </div>
         </div>
@@ -160,9 +162,6 @@ export function SettingsClient({ profile, user, isPro }: SettingsClientProps) {
         >
           {saving ? "Saving..." : "Save changes"}
         </button>
-        {message && (
-          <span className="text-sm text-[var(--green)]">{message}</span>
-        )}
       </div>
     </div>
   );

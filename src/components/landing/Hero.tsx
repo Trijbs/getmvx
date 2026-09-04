@@ -80,13 +80,22 @@ export function Hero() {
           onSubmit={handleSubmit}
           className="mt-7 flex flex-wrap gap-2"
         >
+          <label htmlFor="hero-email" className="sr-only">
+            Email address
+          </label>
           <input
+            id="hero-email"
             type="email"
             placeholder="your@email.com"
             required
             className="min-w-[180px] flex-1 rounded-[10px] border border-[var(--border2)] bg-[var(--bg3)] px-4 py-3 text-sm text-[var(--text)] outline-none transition-[border-color] placeholder:text-[var(--muted)] focus:border-[var(--accent)]"
           />
-          <select className="appearance-none rounded-[10px] border border-[var(--border2)] bg-[var(--bg3)] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%238a8998%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_12px_center] bg-no-repeat px-4 pr-8 py-3 text-sm text-[var(--muted)] outline-none transition-[border-color] focus:border-[var(--accent)]">
+          <label htmlFor="hero-role" className="sr-only">
+            I am a...
+          </label>
+          <select
+            id="hero-role"
+            className="appearance-none rounded-[10px] border border-[var(--border2)] bg-[var(--bg3)] bg-[url('data:image/svg+xml;charset=UTF-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2212%22%20height%3D%2212%22%20viewBox%3D%220%200%2012%2012%22%3E%3Cpath%20fill%3D%22%238a8998%22%20d%3D%22M6%208L1%203h10z%22%2F%3E%3C%2Fsvg%3E')] bg-[position:right_12px_center] bg-no-repeat px-4 pr-8 py-3 text-sm text-[var(--muted)] outline-none transition-[border-color] focus:border-[var(--accent)]">
             <option value="" disabled selected>
               I am a...
             </option>
@@ -140,7 +149,7 @@ export function Hero() {
       </div>
 
       {/* Right — Live Preview */}
-      <div className="hidden lg:flex lg:flex-col lg:items-center lg:gap-4">
+      <div className="hidden md:flex md:flex-col md:items-center md:gap-4">
         <ProfilePreview />
         <p className="font-[family-name:var(--font-dm-mono)] text-xs text-[var(--muted)]">
           live preview, click themes above

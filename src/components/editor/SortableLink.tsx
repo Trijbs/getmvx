@@ -40,6 +40,7 @@ export function SortableLink({ link, onDelete, onToggle, onEdit }: SortableLinkP
         {...attributes}
         {...listeners}
         className="cursor-grab text-[var(--muted)] active:cursor-grabbing"
+        aria-label={`Drag to reorder ${link.title}`}
       >
         ⠿
       </button>
@@ -56,6 +57,9 @@ export function SortableLink({ link, onDelete, onToggle, onEdit }: SortableLinkP
       {/* Toggle */}
       <button
         onClick={() => onToggle(link.id, !link.isActive)}
+        role="switch"
+        aria-checked={link.isActive}
+        aria-label={`Toggle ${link.title} ${link.isActive ? "off" : "on"}`}
         className={`rounded-full px-2 py-0.5 text-[10px] font-600 ${
           link.isActive
             ? "bg-[var(--green)]/12 text-[var(--green)]"
@@ -76,7 +80,13 @@ export function SortableLink({ link, onDelete, onToggle, onEdit }: SortableLinkP
 
       {/* Delete */}
       <button
-        onClick={() => onDelete(link.id)}
+        onClick={() => {
+          if (
+            window.confirm(`Delete "${link.title}"? This cannot be undone.`)
+          ) {
+            onDelete(link.id);
+          }
+        }}
         className="text-[var(--muted)] transition-colors hover:text-[var(--red)]"
         aria-label="Delete link"
       >
