@@ -1,6 +1,18 @@
+import dynamic from "next/dynamic";
 import { requireAdmin } from "@/lib/admin";
 import { getDailySeries, getTopProfiles, getTopLinks } from "@/lib/metrics";
-import { AdminTrends } from "@/components/admin/AdminTrends";
+
+const AdminTrends = dynamic(
+  () =>
+    import("@/components/admin/AdminTrends").then((m) => m.AdminTrends),
+  {
+    loading: () => (
+      <div className="flex h-[280px] animate-pulse items-center justify-center rounded-lg bg-[var(--surface)]">
+        <span className="text-sm opacity-70">Loading chart...</span>
+      </div>
+    ),
+  }
+);
 
 export default async function AdminMetricsPage() {
   await requireAdmin();

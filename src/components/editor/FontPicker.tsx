@@ -35,6 +35,16 @@ interface FontPickerProps {
   onSelect: (font: string) => void;
 }
 
+function loadFont(fontFamily: string) {
+  if (typeof document === "undefined") return;
+  const link = document.createElement("link");
+  link.rel = "stylesheet";
+  link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(
+    fontFamily
+  )}:wght@400;500;600;700&display=swap`;
+  document.head.appendChild(link);
+}
+
 export function FontPicker({ selected, onSelect }: FontPickerProps) {
   const [showAll, setShowAll] = useState(false);
   const displayed = showAll ? POPULAR_FONTS : POPULAR_FONTS.slice(0, 12);
@@ -52,6 +62,8 @@ export function FontPicker({ selected, onSelect }: FontPickerProps) {
           <button
             key={font}
             onClick={() => onSelect(font)}
+            onMouseEnter={() => loadFont(font)}
+            onFocus={() => loadFont(font)}
             className={`rounded-lg border px-3 py-2.5 text-left text-sm transition-all ${
               selected === font
                 ? "border-[var(--accent)] bg-[var(--accent-dim)]"

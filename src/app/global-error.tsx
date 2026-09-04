@@ -16,7 +16,7 @@ export default function GlobalError({
   }, [error]);
 
   return (
-    <html>
+    <html lang="en">
       <body
         style={{
           margin: 0,
@@ -31,7 +31,7 @@ export default function GlobalError({
           padding: "1rem",
         }}
       >
-        <div>
+        <div style={{ maxWidth: "420px", width: "100%" }}>
           <p style={{ fontSize: "3rem", margin: "0 0 1rem" }}>💥</p>
           <h1
             style={{
@@ -45,7 +45,14 @@ export default function GlobalError({
           <p style={{ color: "#888", margin: "0 0 2rem", fontSize: "0.9rem" }}>
             We&apos;ve been notified and will look into it.
           </p>
-          <div style={{ display: "flex", gap: "0.75rem", justifyContent: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "0.75rem",
+              justifyContent: "center",
+              flexWrap: "wrap",
+            }}
+          >
             <button
               onClick={reset}
               style={{

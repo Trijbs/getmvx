@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { PRICING } from "@/lib/pricing";
 
 export const metadata: Metadata = {
   title: "Terms of Service — MVX",
@@ -130,11 +131,12 @@ export default function TermsPage() {
               6. Pro Subscriptions
             </h2>
             <p className="mb-3">
-              MVX Pro is a paid subscription billed monthly (€4.99) or
-              annually (€39.99) through Gumroad. Gumroad acts as the merchant
-              of record for all transactions. Subscriptions automatically renew
-              unless cancelled before the renewal date. You may cancel at any
-              time from your account settings.
+              MVX Pro is a paid subscription billed monthly (€
+              {PRICING.pro.monthly.amount}) or annually (€
+              {PRICING.pro.yearly.amount}) through Gumroad. Gumroad acts as the
+              merchant of record for all transactions. Subscriptions
+              automatically renew unless cancelled before the renewal date. You
+              may cancel at any time from your account settings.
             </p>
             <p className="mb-3">
               <strong className="text-[var(--text)]">
