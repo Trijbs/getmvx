@@ -35,11 +35,11 @@ export function CollectionStory() {
       tl.fromTo(q(".story-ticker"), { opacity: 0 }, { opacity: 1, duration: 0.3, immediateRender: true }, 0.3);
       tl.fromTo(q(".story-chip"), { x: 110, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3, ease: "power2.out", stagger: 0.06, immediateRender: true }, 0.3);
 
-      tl.to(q(".story-eyebrow, .story-line-1, .story-line-2, .story-caption, .story-cta, .story-ticker"), { y: -36, opacity: 0, duration: 0.38, ease: "power2.in" }, 0.5);
-      tl.to(q(".story-chip, .story-tag"), { x: -90, opacity: 0, duration: 0.3, ease: "power2.in" }, 0.52);
+      tl.to(q(".story-eyebrow, .story-line-1, .story-line-2, .story-caption, .story-cta, .story-ticker"), { y: -36, opacity: 0, duration: 0.38, ease: "power2.in" }, 0.36);
+      tl.to(q(".story-chip, .story-tag"), { x: -90, opacity: 0, duration: 0.3, ease: "power2.in" }, 0.38);
 
       if (stage) {
-        const diveScale = Math.min(3.6, Math.max(2.1, window.innerWidth / 520));
+        const diveScale = Math.min(2.9, Math.max(2.0, window.innerWidth / 520));
         tl.to(
           stage,
           {
@@ -47,24 +47,24 @@ export function CollectionStory() {
             y: () => window.innerHeight / 2 - (stage.getBoundingClientRect().top + stage.getBoundingClientRect().height / 2),
             scale: diveScale,
             transformOrigin: "50% 50%",
-            ease: "power4.inOut",
-            duration: 0.5,
+            ease: "power1.inOut",
+            duration: 1.1,
           },
-          0.55,
+          0.3,
         );
-        tl.to(q(".story-glow"), { scale: 1.15, opacity: 0.95, duration: 0.3, ease: "power2.out" }, 1.05);
-        tl.to(stage, { scale: diveScale * 0.96, duration: 0.34, ease: "power2.in" }, 1.56);
+        tl.to(q(".story-glow"), { scale: 1.15, opacity: 0.95, duration: 0.3, ease: "power2.out" }, 1.4);
+        tl.to(stage, { scale: diveScale * 0.96, duration: 0.3, ease: "power2.in" }, 1.7);
       }
 
-      tl.fromTo(q(".story-hold"), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.32, ease: "power3.out", immediateRender: true }, 1.05);
-      tl.to(q(".story-hold"), { y: -22, opacity: 0, duration: 0.26, ease: "power2.in" }, 1.5);
-      tl.to(q(".story-card"), { rotationX: 88, y: -56, opacity: 0, transformOrigin: "50% 100%", ease: "power2.in", duration: 0.34 }, 1.56);
+      tl.fromTo(q(".story-hold"), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power3.out", immediateRender: true }, 1.4);
+      tl.to(q(".story-hold"), { y: -22, opacity: 0, duration: 0.26, ease: "power2.in" }, 1.7);
+      tl.to(q(".story-card"), { rotationX: 88, y: -56, opacity: 0, transformOrigin: "50% 100%", ease: "power2.in", duration: 0.3 }, 1.7);
     },
   });
 
   return (
     <section ref={sectionRef} id="platform" aria-label="The platform" className="relative">
-      <PinSection heightVh={300}>
+      <PinSection heightVh={400}>
         <div className="relative grid h-full grid-cols-1 items-center gap-12 overflow-hidden px-[5%] py-16 lg:grid-cols-[1fr_auto] lg:py-0">
           <Parallax speed={0.2} className="pointer-events-none absolute right-[4%] top-[10%] hidden text-[var(--accent)] opacity-[0.14] lg:block" ariaHidden>
             <BrandSymbol name="constellation" size={460} className="max-w-[min(520px,70vw)]" />
