@@ -1,13 +1,10 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import gsap from "gsap";
+import { useRef } from "react";
 import Link from "next/link";
 import { BrandSymbol } from "@/components/brand";
 import { Parallax } from "@/components/motion/Parallax";
 import { PinSection } from "@/components/motion/PinSection";
-import { useIsDesktop } from "@/hooks/useIsDesktop";
-import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useScrollTimeline } from "@/lib/motion/timeline";
 import { ProfilePreview } from "./ProfilePreview";
 
@@ -22,40 +19,48 @@ const TICKER = ["UNLIMITED LINKS", "LIVE WIDGETS", "REAL ANALYTICS", "CSS INJECT
 
 export function CollectionStory() {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const isDesktopView = useIsDesktop();
-  const reducedMotion = usePrefersReducedMotion();
 
   useScrollTimeline(sectionRef, {
     start: "top top",
     end: () => (sectionRef.current ? sectionRef.current.offsetHeight - window.innerHeight : 0),
     scrub: 0.6,
     build: ({ tl, q }) => {
-      tl.fromTo(q(".story-eyebrow"), { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.2, immediateRender: true }, 0);
-      tl.fromTo(q(".story-line-1"), { y: 48, opacity: 0 }, { y: 0, opacity: 1, duration: 0.32, ease: "power3.out", immediateRender: true }, 0.06);
-      tl.fromTo(q(".story-line-2a"), { y: 48, opacity: 0 }, { y: 0, opacity: 1, duration: 0.32, ease: "power3.out", immediateRender: true }, 0.13);
-      tl.fromTo(q(".story-stage"), { y: 72, scale: 0.92, opacity: 0 }, { y: 0, scale: 1, opacity: 1, duration: 0.5, ease: "power3.out", immediateRender: true }, 0.2);
-      tl.fromTo(q(".story-caption-a"), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, immediateRender: true }, 0.34);
-      tl.fromTo(q(".story-caption"), { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, immediateRender: true }, 0.36);
-      tl.fromTo(q(".story-cta"), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, immediateRender: true }, 0.38);
-      tl.fromTo(q(".story-ticker"), { opacity: 0 }, { opacity: 1, duration: 0.3, immediateRender: true }, 0.44);
-      tl.fromTo(q(".story-chip"), { x: 110, opacity: 0 }, { x: 0, opacity: 1, duration: 0.5, ease: "power2.out", stagger: 0.12, immediateRender: true }, 0.46);
-      tl.to(q(".story-line-2a"), { y: -14, opacity: 0, duration: 0.3 }, 0.7);
-      tl.fromTo(q(".story-line-2b"), { y: 14, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, immediateRender: true }, 0.7);
-      tl.to(q(".story-caption-a"), { opacity: 0, duration: 0.25 }, 0.76);
-      tl.fromTo(q(".story-caption-b"), { opacity: 0 }, { opacity: 1, duration: 0.25, immediateRender: true }, 0.76);
-      tl.to(q(".story-stage"), { scale: 0.97, opacity: 0.92, duration: 0.28 }, 1.18);
-      tl.to(q(".story-chip, .story-caption, .story-caption-b, .story-cta, .story-ticker, .story-line-1, .story-line-2b"), { y: -18, opacity: 0.16, duration: 0.28 }, 1.18);
+      const stage = q(".story-stage")[0] as HTMLElement | undefined;
+
+      tl.fromTo(q(".story-eyebrow"), { y: 10, opacity: 0 }, { y: 0, opacity: 1, duration: 0.25, immediateRender: true }, 0);
+      tl.fromTo(q(".story-line-1"), { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power3.out", immediateRender: true }, 0.06);
+      tl.fromTo(q(".story-line-2"), { y: 44, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, ease: "power3.out", immediateRender: true }, 0.12);
+      tl.fromTo(q(".story-caption"), { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, immediateRender: true }, 0.22);
+      tl.fromTo(q(".story-cta"), { y: 12, opacity: 0 }, { y: 0, opacity: 1, duration: 0.3, immediateRender: true }, 0.26);
+      tl.fromTo(q(".story-ticker"), { opacity: 0 }, { opacity: 1, duration: 0.3, immediateRender: true }, 0.3);
+      tl.fromTo(q(".story-chip"), { x: 110, opacity: 0 }, { x: 0, opacity: 1, duration: 0.3, ease: "power2.out", stagger: 0.06, immediateRender: true }, 0.3);
+
+      tl.to(q(".story-eyebrow, .story-line-1, .story-line-2, .story-caption, .story-cta, .story-ticker"), { y: -36, opacity: 0, duration: 0.38, ease: "power2.in" }, 0.5);
+      tl.to(q(".story-chip, .story-tag"), { x: -90, opacity: 0, duration: 0.3, ease: "power2.in" }, 0.52);
+
+      if (stage) {
+        const diveScale = Math.min(3.6, Math.max(2.1, window.innerWidth / 520));
+        tl.to(
+          stage,
+          {
+            x: () => window.innerWidth / 2 - (stage.getBoundingClientRect().left + stage.getBoundingClientRect().width / 2),
+            y: () => window.innerHeight / 2 - (stage.getBoundingClientRect().top + stage.getBoundingClientRect().height / 2),
+            scale: diveScale,
+            transformOrigin: "50% 50%",
+            ease: "power4.inOut",
+            duration: 0.5,
+          },
+          0.55,
+        );
+        tl.to(q(".story-glow"), { scale: 1.15, opacity: 0.95, duration: 0.3, ease: "power2.out" }, 1.05);
+        tl.to(stage, { scale: diveScale * 0.96, duration: 0.34, ease: "power2.in" }, 1.56);
+      }
+
+      tl.fromTo(q(".story-hold"), { y: 26, opacity: 0 }, { y: 0, opacity: 1, duration: 0.32, ease: "power3.out", immediateRender: true }, 1.05);
+      tl.to(q(".story-hold"), { y: -22, opacity: 0, duration: 0.26, ease: "power2.in" }, 1.5);
+      tl.to(q(".story-card"), { rotationX: 88, y: -56, opacity: 0, transformOrigin: "50% 100%", ease: "power2.in", duration: 0.34 }, 1.56);
     },
   });
-
-  useEffect(() => {
-    const el = sectionRef.current?.querySelector(".story-breathe");
-    if (!el || !isDesktopView || reducedMotion) return;
-    const tween = gsap.fromTo(el, { scale: 1 }, { scale: 1.032, duration: 3.4, ease: "sine.inOut", yoyo: true, repeat: -1 });
-    return () => {
-      tween.kill();
-    };
-  }, [isDesktopView, reducedMotion]);
 
   return (
     <section ref={sectionRef} id="platform" aria-label="The platform" className="relative">
@@ -65,31 +70,25 @@ export function CollectionStory() {
             <BrandSymbol name="constellation" size={460} className="max-w-[min(520px,70vw)]" />
           </Parallax>
 
+          <div className="story-hold pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-0">
+            <span className="max-w-[720px] px-[5%] text-center font-display text-[clamp(28px,4.5vw,56px)] font-[800] uppercase leading-[0.95] tracking-[-0.01em] text-[var(--text)]">
+              The whole you.
+              <br />
+              <span className="text-[var(--accent2)]">One link.</span>
+            </span>
+          </div>
+
           <div className="relative z-10">
             <span className="story-eyebrow mb-6 block font-mono text-[11px] tracking-[0.28em] text-[var(--accent)]">
               {"//"} 02 — THE PLATFORM
             </span>
             <h2 className="font-display text-[clamp(44px,7vw,104px)] font-[800] uppercase leading-[0.9] tracking-[-0.02em] text-[var(--text)]">
               <span className="story-line-1 block">One card.</span>
-              <span className="relative block">
-                <span className="story-line-2a absolute inset-0 block text-[var(--accent)]">Holds everything.</span>
-                <span className="story-line-2b absolute inset-0 block opacity-0 text-[var(--accent2)]">Owns every signal.</span>
-                <span className="invisible block">&nbsp;</span>
-              </span>
+              <span className="story-line-2 block text-[var(--accent)]">Holds everything.</span>
             </h2>
-            <p className="story-caption relative mt-7 max-w-[480px] text-[15px] leading-relaxed text-[var(--muted)]">
-              <span className="story-caption-a absolute inset-0 block">
-                Your MVX page is one living card: every social, every link, every
-                piece of your identity — in one place, styled the way you want.
-              </span>
-              <span className="story-caption-b absolute inset-0 block opacity-0">
-                One link in your bio. Every platform, every identity in sync —
-                styled exactly the way you want.
-              </span>
-              <span className="invisible">
-                Your MVX page is one living card: every social, every link, every
-                piece of your identity — in one place, styled the way you want.
-              </span>
+            <p className="story-caption mt-7 max-w-[480px] text-[15px] leading-relaxed text-[var(--muted)]">
+              Your MVX page is one living card: every social, every link, every
+              piece of your identity — in one place, styled the way you want.
             </p>
 
             <Link
@@ -108,18 +107,18 @@ export function CollectionStory() {
             </div>
           </div>
 
-          <div className="relative z-10 flex flex-col items-center justify-center lg:w-[420px]">
+          <div className="relative z-10 flex flex-col items-center justify-center lg:w-[520px]">
             <div className="story-stage relative">
-              <div className="absolute -inset-10 -z-10 rounded-full bg-[radial-gradient(circle,var(--accent-glow)_0%,transparent_70%)]" />
-              <div className="story-breathe">
+              <div className="story-glow absolute -inset-10 -z-10 rounded-full bg-[radial-gradient(circle,var(--accent-glow)_0%,transparent_70%)] opacity-60" />
+              <div className="story-card relative">
                 <ProfilePreview />
               </div>
             </div>
-            <p className="story-caption mt-4 font-mono text-[10px] tracking-[0.25em] text-[var(--muted)]">
+            <p className="story-tag mt-4 font-mono text-[10px] tracking-[0.25em] text-[var(--muted)]">
               LIVE PREVIEW — CLICK THEMES ABOVE
             </p>
 
-            <div className="mt-8 flex flex-wrap justify-center gap-3 lg:absolute lg:bottom-[10%] lg:left-1/2 lg:mt-0 lg:w-max lg:-translate-x-1/2">
+            <div className="story-chips mt-8 flex flex-wrap justify-center gap-3 lg:absolute lg:bottom-[10%] lg:left-1/2 lg:mt-0 lg:w-max lg:-translate-x-1/2">
               {WIDGET_CHIPS.map((chip) => (
                 <span
                   key={chip.tag}
